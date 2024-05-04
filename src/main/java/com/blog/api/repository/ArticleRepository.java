@@ -1,13 +1,11 @@
 package com.blog.api.repository;
 
-import com.blog.api.models.entity.Article;
-import com.blog.api.models.entity.User;
+import com.blog.api.entities.Article;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-
-public interface ArticleRepository extends JpaRepository<Article, Long> {
-    public List<Article> findArticleByTitle(String title);
+@Repository
+public interface ArticleRepository extends JpaRepository<Article, String> {
+    public boolean existsByTitle(String title);
 
 }

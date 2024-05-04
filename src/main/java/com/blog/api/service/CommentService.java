@@ -1,19 +1,20 @@
 package com.blog.api.service;
 
-import com.blog.api.models.dto.CommentDTO;
-import com.blog.api.models.entity.Comment;
-import com.blog.api.models.request.CommentRequest;
+import com.blog.api.dto.request.CommentCreationRequest;
+import com.blog.api.dto.response.CommentResponse;
+import com.blog.api.types.TableType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 @Service
 public interface CommentService {
-    public CommentDTO createComment(CommentRequest newComment);
-    public List<CommentDTO> getAllCommentByArt(Long id);
-    public List<CommentDTO> getAllCommentByParent(Long id);
-    public List<CommentDTO> getCommentByCommentId(Long id);
-    public List<CommentDTO> getAllComment();
-    public boolean deleteCommentById(Long id);
+    public CommentResponse create(CommentCreationRequest request);
+    public List<CommentResponse> getCommentByTypeAndArtId(TableType type, String id, int pNumber, int pSize);
+    public List<CommentResponse> getAllComment();
+    public CommentResponse getCommentById(String id);
+
+    public List<CommentResponse> getCommentsByArtAndParentId(TableType type, String artId, String parentId,
+                                                             int pNumber, int pSize);
+    public void delete(String id);
 
 }

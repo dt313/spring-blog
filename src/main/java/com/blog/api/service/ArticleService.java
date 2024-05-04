@@ -1,20 +1,19 @@
 package com.blog.api.service;
 
 
-import com.blog.api.models.dto.ArticleDTO;
-import com.blog.api.models.entity.Article;
-import com.blog.api.models.request.ArticleRequest;
+import com.blog.api.dto.response.ArticleResponse;
+import com.blog.api.dto.request.ArticleRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public interface ArticleService {
-    public List<ArticleDTO> getAllArticle();
-    public ArticleDTO getArticleById(Long id);
-    public ArticleDTO insertArticle(ArticleRequest insertArticle);
-    public ArticleDTO updateArticle(Long id, ArticleRequest updateArticle);
-    public boolean deleteArticle(Long id);
+    public List<ArticleResponse> getAll();
+    public ArticleResponse getById(String id);
+    public ArticleResponse create(ArticleRequest insertArticle);
+    public ArticleResponse update(String id, ArticleRequest updateArticle);
+    public void delete(String id);
 
 
 }

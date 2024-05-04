@@ -1,42 +1,60 @@
 package com.blog.api.controller;
 
-import com.blog.api.models.dto.ArticleDTO;
-import com.blog.api.models.dto.BookmarkDTO;
-import com.blog.api.models.entity.Bookmark;
-import com.blog.api.models.entity.ResponseObject;
-import com.blog.api.models.request.BookmarkRequest;
-import com.blog.api.repository.BookmarkRepository;
+import com.blog.api.dto.request.BookmarkRequest;
+import com.blog.api.dto.response.BookmarkResponse;
+import com.blog.api.entities.ResponseObject;
 import com.blog.api.service.BookmarkService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.blog.api.types.ReactionTableType;
+import com.blog.api.types.TableType;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Book;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/api/v1/bookmark")
 public class BookmarkController {
-    @Autowired
-    private BookmarkService bookmarkService;
+    BookmarkService bookmarkService;
+
+    @GetMapping("")
+    ResponseEntity<ResponseObject> getAll() {
+        List<BookmarkResponse> result = bookmarkService.getAll();
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(
+                HttpStatus.OK,"success", result
+        ));
+    }
+
+    @GetMapping("/length/{id}")
+    ResponseEntity<ResponseObject> countOfBookmarkByBookmarkTableId(@PathVariable String id ) {
+        Integer result = bookmarkService.countOfBookmarkByBookmarkTableId(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(
+                HttpStatus.OK,"success", result
+        ));
+    }
+
+    @GetMapping("/check")
+    ResponseEntity<ResponseObject> checkIsBookmarked(
+            @RequestParam(required = true ) TableType tableType,
+            @RequestParam(required = true) String bookmarkTableId,
+            @RequestParam(required = true) String userId
+    ) {
+        boolean result = bookmarkService.checkIsBookmarked(tableType,bookmarkTableId,userId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(
+                HttpStatus.OK,"success", result
+        ));
+    }
+
     @PostMapping("/toggle")
-    private ResponseEntity<ResponseObject> toggleBookmark(@RequestBody BookmarkRequest newBookmark) {
-        System.out.println(newBookmark);
-        BookmarkDTO result = bookmarkService.toggleBookmark(newBookmark);
-        if (result == null) {
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "deleted bookmark successfully", false));
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "bookmark successfully", true));
-
+    ResponseEntity<ResponseObject> toggle(@RequestBody BookmarkRequest request) {
+         bookmarkService.toggle(request);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(
+                HttpStatus.OK,"success", null
+        ));
     }
-
-    @GetMapping("/user/{id}")
-    private ResponseEntity<ResponseObject> getAllBookmarkByUser(@PathVariable Long id) {
-        System.out.println("Here");
-        List<BookmarkDTO> result = bookmarkService.getAllBookmarkByUserId(id);
-
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "query all bookamrk succesfully", result));
-    }
-
 }

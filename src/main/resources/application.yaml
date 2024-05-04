@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api
+
+  datasource:
+    url: "jdbc:oracle:thin:@localhost:1521:xe"
+    username: dt313
+    password: Abc123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+
+jwt:
+  signerKey: "by3A3pE0Xi35UmiCMaTxUiGP80OkIyedn3F4v4ke4O2XPu/MXK57FanVqhUTpZ7y"

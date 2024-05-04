@@ -1,12 +1,13 @@
 package com.blog.api.controller;
 
-import com.blog.api.models.dto.CommentDTO;
-import com.blog.api.models.entity.Comment;
-import com.blog.api.models.entity.ResponseObject;
-import com.blog.api.models.request.CommentRequest;
+import com.blog.api.dto.request.CommentCreationRequest;
+import com.blog.api.dto.response.CommentResponse;
+import com.blog.api.entities.ResponseObject;
 import com.blog.api.service.CommentService;
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.blog.api.types.TableType;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,32 +15,62 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/comment")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping("/api/v1/comments")
 public class CommentController {
-
-    @Autowired
-    private CommentService commentService;
-    @PostMapping("/create")
-    private ResponseEntity<ResponseObject> createComment(@RequestBody CommentRequest comment) {
-        CommentDTO result = commentService.createComment(comment);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "create comment successfully", result));
-    }
-
-    @GetMapping("/{id}")
-    private ResponseEntity<ResponseObject> getCommentByCommentId(@PathVariable Long id) {
-        List<CommentDTO> result = commentService.getCommentByCommentId(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "get comment successfully", result));
-    }
+    CommentService commentService;
 
     @GetMapping("")
-    private ResponseEntity<ResponseObject> getAll() {
-        List<CommentDTO> result = commentService.getAllComment();
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "get all comment successfully", result));
+    ResponseEntity<ResponseObject> getAllComment() {
+        List<CommentResponse> result = commentService.getAllComment();
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+    }
+    @PostMapping("")
+    ResponseEntity<ResponseObject> create(@RequestBody CommentCreationRequest request) {
+        CommentResponse result = commentService.create(request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
     }
 
-    @DeleteMapping("/delete/{id}")
-    private ResponseEntity<ResponseObject> deleteCommentById(@PathVariable Long id) {
-        boolean result = commentService.deleteCommentById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "delete comment successfully", result));
+    @GetMapping("/{type}/{artId}")
+    ResponseEntity<ResponseObject> getCommentsByArtId(
+            @PathVariable TableType type,
+            @PathVariable String artId ,
+            @RequestParam(required = false, defaultValue = "0", value ="pNumber") int pageNumber,
+            @RequestParam(required = false, defaultValue = "10", value ="pSize") int pageSize
+            ) {
+        List<CommentResponse> result = commentService.getCommentByTypeAndArtId(type,artId, pageNumber,pageSize);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+    }
+
+    @GetMapping("/{type}/{artId}/comment/{parentId}")
+    ResponseEntity<ResponseObject> getCommentsByArtAndParentId(
+            @PathVariable(required = false) TableType type,
+            @PathVariable(required = true) String artId,
+            @PathVariable(required = false) String parentId,
+            @RequestParam(required = false, defaultValue = "0", value ="pNumber") int pageNumber,
+            @RequestParam(required = false, defaultValue = "10", value ="pSize") int pageSize
+    )
+    {
+        List<CommentResponse> result = commentService.getCommentsByArtAndParentId(type,artId,parentId,pageNumber,pageSize);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+    }
+
+
+    @GetMapping("/{id}")
+    ResponseEntity<ResponseObject> getCommentsById(@PathVariable String id) {
+        CommentResponse result = commentService.getCommentById(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<ResponseObject> deleteById(@PathVariable String id) {
+        commentService.delete(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", null));
     }
 }

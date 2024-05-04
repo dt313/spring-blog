@@ -1,14 +1,18 @@
 package com.blog.api.service;
 
-import com.blog.api.models.dto.BookmarkDTO;
-import com.blog.api.models.entity.Bookmark;
-import com.blog.api.models.request.BookmarkRequest;
+import com.blog.api.dto.request.BookmarkRequest;
+import com.blog.api.dto.response.ArticleResponse;
+import com.blog.api.dto.response.BookmarkResponse;
+import com.blog.api.types.TableType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public interface BookmarkService {
-    public List<BookmarkDTO> getAllBookmarkByUserId(Long id);
-    public BookmarkDTO toggleBookmark(BookmarkRequest newBookmark);
+    public List<Object> getAllBookmarkedArticleByType(TableType typeTable,String userId);
+    public boolean checkIsBookmarked(TableType type, String bookmarkTableId, String userId);
+    public void toggle(BookmarkRequest request);
+    public List<BookmarkResponse> getAll();
+    public Integer countOfBookmarkByBookmarkTableId(String id);
 }
