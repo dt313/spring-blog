@@ -1,17 +1,15 @@
 package com.blog.api.dto.request;
 
-import com.blog.api.types.TableType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CommentCreationRequest {
-    String commentableId;
-    String publisher;
-    TableType commentType;
-    String content;
+public class SuggestionRequest {
+    String userId;
+    Set<String> topics;
 }

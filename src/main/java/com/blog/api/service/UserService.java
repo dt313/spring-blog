@@ -16,7 +16,7 @@ public interface UserService {
     public List<UserResponse> getAllUsers();
 
 //    @PostAuthorize("returnObject.username == authentication.name")
-    public UserResponse getUser(String id);
+    public UserResponse getUserByUsername(String id);
 
     UserResponse createUser(UserCreationRequest newUser);
 

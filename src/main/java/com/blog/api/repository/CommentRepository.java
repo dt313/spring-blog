@@ -10,7 +10,6 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, String> {
-    List<Comment> findAllByCommentTypeAndArtId(TableType type, String id, Pageable pageable);
-    List<Comment> findAllByCommentTypeAndArtIdAndParentId(
-            TableType type, String artId, String parentId, Pageable pageable);
+    List<Comment> findAllByCommentTypeAndCommentableId(TableType type, String id, Pageable pageable);
+    List<Comment> findAllByCommentTypeAndCommentableId(TableType type, String id);
 }

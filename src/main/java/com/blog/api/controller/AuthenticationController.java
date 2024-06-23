@@ -39,7 +39,6 @@ public class AuthenticationController {
 
     @PostMapping("/logout")
     ResponseEntity<ResponseObject> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
-        System.out.println(request);
         authenticationService.logout(request);
         return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "logout success", ""));
     }

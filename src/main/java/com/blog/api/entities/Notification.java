@@ -1,6 +1,5 @@
 package com.blog.api.entities;
 
-import com.blog.api.types.ReactionTableType;
 import com.blog.api.types.TableType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,7 +36,7 @@ public class Notification {
     private User sender;
     @Column
     @Enumerated(EnumType.STRING)
-    private ReactionTableType action;
+    private TableType action;
     @ManyToOne()
     private Article context;
     @ManyToOne

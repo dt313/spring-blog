@@ -1,12 +1,15 @@
 package com.blog.api.entities;
 
-import com.blog.api.types.ReactionTableType;
 import com.blog.api.types.ReactionType;
+import com.blog.api.types.TableType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.util.*;
 
 @Entity
@@ -24,15 +27,10 @@ public class Reaction {
     @Enumerated(EnumType.STRING)
     ReactionType type;
     @Enumerated(EnumType.STRING)
-    ReactionTableType reactionTableType;
+    TableType reactionTableType;
     @ManyToOne
     User reactedUser;
-
-//    @CreatedDate
-//    private LocalDateTime createdAt;
-//    @LastModifiedDate
-//    private LocalDateTime updatedAt;
-
-
-
+    @Column(updatable = false)
+    @CreationTimestamp
+    Instant createdAt;
 }

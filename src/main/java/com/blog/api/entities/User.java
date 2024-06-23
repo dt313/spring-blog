@@ -3,10 +3,13 @@ package com.blog.api.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -52,13 +55,12 @@ public class User {
 //    private boolean isPro;
 //    @Column
 //    private boolean isDeleted;
-
     //  date
-    @CreatedDate
     @Column(updatable = false)
-    private LocalDateTime createdAt;
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
+    @CreationTimestamp
+    Instant createdAt;
+    @UpdateTimestamp
+    Instant updatedAt;
 
 
 }

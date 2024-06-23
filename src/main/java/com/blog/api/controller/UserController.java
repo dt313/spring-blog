@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
+//@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -40,14 +40,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "Query all user successfully", users ));
     }
 
-    @GetMapping("/{id}")
-    private ResponseEntity<ResponseObject> getUserById(@PathVariable String id) {
-        UserResponse foundedUser = userService.getUser(id);
+    @GetMapping("/{username}")
+    private ResponseEntity<ResponseObject> getUserByUsername(@PathVariable String username) {
+        UserResponse foundedUser = userService.getUserByUsername(username);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "Query user by id successfully", foundedUser));
     }
 
     @PostMapping("")
     private ResponseEntity<ResponseObject> createUser(@RequestBody @Valid UserCreationRequest request) {
+        System.out.println(request);
         UserResponse insertedUser = userService.createUser(request);
         System.out.println(insertedUser);
         return ResponseEntity.status(HttpStatus.OK).body(

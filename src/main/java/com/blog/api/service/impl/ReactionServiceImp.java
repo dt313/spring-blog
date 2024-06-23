@@ -13,8 +13,8 @@ import com.blog.api.repository.CommentRepository;
 import com.blog.api.repository.ReactionRepository;
 import com.blog.api.repository.UserRepository;
 import com.blog.api.service.ReactionService;
-import com.blog.api.types.ReactionTableType;
 import com.blog.api.types.ReactionType;
+import com.blog.api.types.TableType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -46,7 +46,7 @@ public class ReactionServiceImp implements ReactionService {
     }
 
     @Override
-    public void toggleReaction(ReactionRequest request) {
+    public ReactionType toggleReaction(ReactionRequest request) {
         boolean isExistsReactionTable = checkReactionTable(request.getReactionTableType(), request.getReactionTableId());
         if(!isExistsReactionTable) {
             throw new AppException(ErrorCode.ARTICLE_NOT_FOUND);
@@ -62,26 +62,26 @@ public class ReactionServiceImp implements ReactionService {
             reaction = reactionMapper.toReaction(request);
             reaction.setReactedUser(reactedUser);
             reactionRepository.save(reaction);
-            return;
+            return reaction.getType();
 
         }else {
             if(reaction.getType().toString().equals(request.getType().toString())) {
                 // remove reaction
                 reactionRepository.deleteById(reaction.getId());
-                return;
+                return ReactionType.NULL;
             }
             // mapping reaction
             reactionMapper.mappingReaction(reaction,request);
             System.out.println(reaction);
             reaction.setReactedUser(reactedUser);
             reactionRepository.save(reaction);
-            return;
+            return reaction.getType();
 
         }
     }
 
     @Override
-    public List<ReactionResponse> getAllByReactionTableId(ReactionTableType type,String id) {
+    public List<ReactionResponse> getAllByReactionTableId(TableType type,String id) {
         boolean isExists = checkReactionTable(type,id);
         if(isExists) {
             List<Reaction> reactions = reactionRepository.findAllByReactionTableId(id);
@@ -113,6 +113,8 @@ public class ReactionServiceImp implements ReactionService {
         return reactions.size();
     }
 
+
+
     @Override
     public Integer countOfReactionByReactionTableId(String id) {
         List<Reaction> reactions = reactionRepository.findAllByReactionTableId(id);
@@ -120,7 +122,8 @@ public class ReactionServiceImp implements ReactionService {
     }
 
     @Override
-    public ReactionType checkReaction(ReactionTableType type, String reactionTableId, String userId) {
+    public ReactionType checkReaction(TableType type, String reactionTableId, String userId) {
+        System.out.println(reactionTableId);
         boolean isExists = checkReactionTable(type,reactionTableId);
         if(!isExists) {
             throw new AppException(ErrorCode.ARTICLE_NOT_FOUND);
@@ -136,26 +139,23 @@ public class ReactionServiceImp implements ReactionService {
         return reaction.getType();
     }
 
-    private boolean checkReactionTable(ReactionTableType type, String id) {
-        switch (type.toString()){
-            case "ARTICLE":
+    private boolean checkReactionTable(TableType type, String id) {
+        switch (type){
+            case TableType.ARTICLE:
                 articleRepository.findById(id).orElseThrow(
                         () -> new AppException(ErrorCode.ARTICLE_NOT_FOUND)
                 );
                 return true;
-            case "QUESTION":
+            case TableType.QUESTION:
                 return false;
 
-            case "ARTICLE_COMMENT":
+            case TableType.COMMENT:
                 commentRepository.findById(id).orElseThrow(
                         () -> new AppException(ErrorCode.COMMENT_NOT_FOUND)
                 );
                 return true;
-
-            case "QUESION_COMMENT":
-                return false;
             default:
-                return false;
+                throw new AppException(ErrorCode.NO_TYPE_TABLE);
         }
     }
 

@@ -2,8 +2,12 @@ package com.blog.api.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.util.*;
 
 @Entity
@@ -23,18 +27,19 @@ public class Article {
     @ManyToOne()
     User author;
     String title;
+    @Lob
     String content;
     String metaTitle;
     String description;
     String thumbnail;
     @ManyToMany()
     @JoinTable(
-            name = "topicOfArticle",
+            name = "topics_of_article",
             joinColumns = @JoinColumn(name = "article_id"),
             inverseJoinColumns = @JoinColumn(name = "topic_id")
     )
     Set<Topic> topics;
-    @OneToMany(mappedBy = "artId",cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "commentableId",cascade = CascadeType.REMOVE)
     List<Comment> comments;
 
     @OneToMany(mappedBy = "reactionTableId",cascade = CascadeType.REMOVE)
@@ -43,20 +48,17 @@ public class Article {
     @OneToMany(mappedBy = "bookmarkTableId",cascade = CascadeType.REMOVE)
     List<Bookmark> bookmarks;
 
-//    @Column
-//    private boolean isApproved;
-//    @Column
-//    private boolean isDeleted;
-//    private Integer likeCount = 0;
-//    private Integer commentCount = 0;
-//    private Integer bookmarkCount = 0;
+    @Formula("(SELECT COUNT(*) FROM reactions r WHERE r.reaction_table_id = id)")
+    Integer reactionCount;
+    @Formula("(SELECT COUNT(*) FROM comments c WHERE c.commentable_id = id)")
+    Integer commentCount;
 
-//
-//    @CreatedDate
-//    @Column(updatable = false)
-//    private LocalDateTime createdAt;
-//    @LastModifiedDate
-//    private LocalDateTime updatedAt;
+    @Column(updatable = false)
+    @CreationTimestamp
+    Instant createdAt;
+    @UpdateTimestamp
+    Instant updatedAt;
+
 
 
 }

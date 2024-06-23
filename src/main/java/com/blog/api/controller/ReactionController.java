@@ -4,8 +4,8 @@ import com.blog.api.dto.request.ReactionRequest;
 import com.blog.api.dto.response.ReactionResponse;
 import com.blog.api.entities.ResponseObject;
 import com.blog.api.service.ReactionService;
-import com.blog.api.types.ReactionTableType;
 import com.blog.api.types.ReactionType;
+import com.blog.api.types.TableType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,12 +29,12 @@ public class ReactionController {
 
     @PostMapping("/toggle")
     ResponseEntity<ResponseObject> toggle(@RequestBody ReactionRequest request) {
-        reactionService.toggleReaction(request);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",null));
+        ReactionType isReacted = reactionService.toggleReaction(request);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",isReacted));
     }
 
     @GetMapping("/{type}/{id}")
-    ResponseEntity<ResponseObject> getAllByReactionTableId(@PathVariable ReactionTableType type, @PathVariable String id) {
+    ResponseEntity<ResponseObject> getAllByReactionTableId(@PathVariable TableType type, @PathVariable String id) {
         List<ReactionResponse> result = reactionService.getAllByReactionTableId(type,id);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
     }
@@ -53,7 +53,7 @@ public class ReactionController {
 
     @GetMapping("/check")
     ResponseEntity<ResponseObject> checkReaction(
-            @RequestParam(required = true ) ReactionTableType reactionTableType,
+            @RequestParam(required = true ) TableType reactionTableType,
             @RequestParam(required = true) String reactionTableId,
             @RequestParam(required = true) String userId
     ) {

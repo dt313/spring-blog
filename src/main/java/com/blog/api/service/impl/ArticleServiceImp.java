@@ -1,6 +1,7 @@
 package com.blog.api.service.impl;
 
 import com.blog.api.dto.request.ArticleRequest;
+import com.blog.api.dto.request.SuggestionRequest;
 import com.blog.api.dto.response.ArticleResponse;
 import com.blog.api.entities.Article;
 import com.blog.api.entities.Topic;
@@ -17,6 +18,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -33,11 +37,26 @@ public class ArticleServiceImp implements ArticleService {
     ArticleMapper articleMapper;
     UserMapper userMapper;
     @Override
-    public List<ArticleResponse> getAll() {
-        List<ArticleResponse> articles = articleRepository.findAll().stream().map((article) -> {
+    public List<ArticleResponse> getAll(String searchValue ,int pageNumber, int pageSize) {
+        Sort sort = Sort.by("createdAt").descending();
+        PageRequest pageRequest = PageRequest.of(pageNumber -1, pageSize, sort);
+        List<ArticleResponse> articles = articleRepository.findByTitleContaining(searchValue,pageRequest).stream().map((article) -> {
            ArticleResponse temp = articleMapper.toArticleResponse(article);
            temp.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
            return temp;
+        }).toList();
+        return articles;
+
+    }
+
+    @Override
+    public List<ArticleResponse> getAllByTopic(String name,int pageNumber, int pageSize ) {
+        Sort sort = Sort.by("createdAt").descending();
+        PageRequest pageRequest = PageRequest.of(pageNumber -1, pageSize, sort);
+        List<ArticleResponse> articles = articleRepository.findByTopicName(name, pageRequest).stream().map((article) -> {
+            ArticleResponse temp = articleMapper.toArticleResponse(article);
+            temp.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
+            return temp;
         }).toList();
         return articles;
 
@@ -55,13 +74,41 @@ public class ArticleServiceImp implements ArticleService {
     }
 
     @Override
-    public ArticleResponse create(ArticleRequest request) {
-        log.info("info : "+request );
-        boolean isExistArticle = articleRepository.existsByTitle(request.getTitle());
-        if(isExistArticle) throw new AppException(ErrorCode.ARTICLE_EXISTS);
-        User author = userRepository.findById(request.getAuthor()).orElseThrow(() ->
+    public List<ArticleResponse> getAllArticleByAuthor(String id) {
+
+        User author = userRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
 
+        List<ArticleResponse> articles = articleRepository.findAllByAuthor(author).stream().map((article) -> {
+            ArticleResponse temp = articleMapper.toArticleResponse(article);
+            temp.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
+            return temp;
+        }).toList();
+        return articles;
+    }
+
+    @Override
+    public List<ArticleResponse> getSuggestionsArticle(SuggestionRequest request) {
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<ArticleResponse> articles = articleRepository.findByTopicsOrAuthor(
+                request.getTopics(), request.getUserId(),pageRequest).stream().map((article)
+                -> {
+            ArticleResponse temp = articleMapper.toArticleResponse(article);
+            temp.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
+            return temp;
+        }).toList();
+        return articles;
+    }
+    @Override
+    public ArticleResponse create(ArticleRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        System.out.println(username);
+        boolean isExistArticle = articleRepository.existsByTitle(request.getTitle());
+        if(isExistArticle) throw new AppException(ErrorCode.ARTICLE_EXISTS);
+
+        User author = userRepository.findByUsername(username).orElseThrow(() ->
+                new AppException(ErrorCode.USER_NOT_FOUND));
         // Author
         Article article = articleMapper.toArticle(request);
         article.setAuthor(author);
@@ -78,24 +125,28 @@ public class ArticleServiceImp implements ArticleService {
 
     @Override
     public ArticleResponse update(String id, ArticleRequest updateArticle) {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        // Author
+        User author = userRepository.findByUsername(username).orElseThrow(() ->
+                new AppException(ErrorCode.USER_NOT_FOUND));
+
         Article article = articleRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.ARTICLE_NOT_FOUND));
+
         articleMapper.updateArticle(article, updateArticle);
-        // Remove Topic
-        removeTopics(updateArticle.getTopics());
 
        // Compare author
-        if(!Objects.equals(article.getAuthor().getId(), updateArticle.getAuthor())) throw
+        if(!Objects.equals(article.getAuthor().getUsername(), username)) throw
                 new AppException(ErrorCode.UNAUTHORIZED);
 
-        // Author
-        User author = userRepository.findById(updateArticle.getAuthor()).orElseThrow(() ->
-                new AppException(ErrorCode.USER_NOT_FOUND));
-        article.setAuthor(author);
+        System.out.println(article);
+        // Remove Topic
+        deleteOldTopic(article.getTopics());
+
        // Topic
         Set<Topic> topics = getListTopics(updateArticle.getTopics());
         article.setTopics(topics);
-
         // Response
         ArticleResponse articleResponse = articleMapper.toArticleResponse(articleRepository.save(article));
         articleResponse.setAuthor(userMapper.toBasicUserResponse(author));
@@ -116,6 +167,18 @@ public class ArticleServiceImp implements ArticleService {
         }
     }
 
+    @Override
+    public Integer lengthOfArticleBySearchValue(String searchValue) {
+        List<Article> articles = articleRepository.findByTitleContaining(searchValue);
+        return articles.size();
+    }
+
+    @Override
+    public Integer lengthOfArticleByTopic(String searchValue) {
+        List<Article> articles = articleRepository.findByTopicName(searchValue);
+        return articles.size();
+    }
+
     private Set<Topic> getListTopics(Set<String> request) {
 
         Set<Topic> topics = new HashSet<>();
@@ -132,23 +195,26 @@ public class ArticleServiceImp implements ArticleService {
         return topics;
     }
 
-    private void removeTopics(Set<String> request) {
-
+    private void deleteOldTopic(Set<Topic> request) {
+        System.out.println(request);
         Set<Topic> topics = new HashSet<>();
-        for(String topic : request) {
-            Topic temp = topicRepository.findById(topic).orElse(null);
+        for(Topic topic : request) {
+            Topic temp = topicRepository.findById(topic.getName()).orElse(null);
+            System.out.println(temp);
             if(Objects.nonNull(temp)) {
-                if(temp.getCount() > 0) {
+                if(temp.getCount() > 1) {
                     temp.setCount(temp.getCount() - 1);
                     topicRepository.save(temp);
 
                 }else {
-                    topicRepository.deleteById(topic);
+                    topicRepository.deleteById(temp.getName());
                 }
             }else continue;
 
         }
     }
+
+
 
 
 }

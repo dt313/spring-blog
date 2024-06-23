@@ -34,36 +34,23 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
     }
 
-    @GetMapping("/{type}/{artId}")
-    ResponseEntity<ResponseObject> getCommentsByArtId(
+    @GetMapping("/{type}/{commentableId}")
+    ResponseEntity<ResponseObject> getCommentsByCommentableId(
             @PathVariable TableType type,
-            @PathVariable String artId ,
-            @RequestParam(required = false, defaultValue = "0", value ="pNumber") int pageNumber,
-            @RequestParam(required = false, defaultValue = "10", value ="pSize") int pageSize
+            @PathVariable String commentableId ,
+            @RequestParam(required = false, defaultValue = "1") int pageNumber,
+            @RequestParam(required = false, defaultValue = "10") int pageSize
             ) {
-        List<CommentResponse> result = commentService.getCommentByTypeAndArtId(type,artId, pageNumber,pageSize);
-
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
-    }
-
-    @GetMapping("/{type}/{artId}/comment/{parentId}")
-    ResponseEntity<ResponseObject> getCommentsByArtAndParentId(
-            @PathVariable(required = false) TableType type,
-            @PathVariable(required = true) String artId,
-            @PathVariable(required = false) String parentId,
-            @RequestParam(required = false, defaultValue = "0", value ="pNumber") int pageNumber,
-            @RequestParam(required = false, defaultValue = "10", value ="pSize") int pageSize
-    )
-    {
-        List<CommentResponse> result = commentService.getCommentsByArtAndParentId(type,artId,parentId,pageNumber,pageSize);
+        List<CommentResponse> result = commentService.getByTypeAndCommentableId(type,commentableId, pageNumber,pageSize);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
     }
 
 
-    @GetMapping("/{id}")
-    ResponseEntity<ResponseObject> getCommentsById(@PathVariable String id) {
-        CommentResponse result = commentService.getCommentById(id);
+
+    @GetMapping("/{commentsById}")
+    ResponseEntity<ResponseObject> getCommentsById(@PathVariable String commentsById) {
+        CommentResponse result = commentService.getById(commentsById);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
     }
@@ -72,5 +59,15 @@ public class CommentController {
     ResponseEntity<ResponseObject> deleteById(@PathVariable String id) {
         commentService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", null));
+    }
+
+    @GetMapping("/length/{type}/{commentsById}")
+    ResponseEntity<ResponseObject> getCountOfCommentByCommentType(
+            @PathVariable TableType type,
+            @PathVariable String commentsById
+    ) {
+        Integer result = commentService.getLengthByCommentTypeAndCommentableId(type,commentsById);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
     }
 }

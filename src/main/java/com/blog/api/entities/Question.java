@@ -1,19 +1,16 @@
 package com.blog.api.entities;
 
-import com.blog.api.types.TableType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -21,28 +18,37 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "questions")
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "comments")
-public class Comment {
+public class Question {
+
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy=GenerationType.UUID)
     String id;
-    String commentableId;
-    @Enumerated(EnumType.STRING)
-    TableType commentType;
-    @ManyToOne
-    User publisher;
+    @ManyToOne()
+    User author;
+    @Lob
     String content;
-    boolean isApproved;
+    @OneToMany(mappedBy = "commentableId",cascade = CascadeType.REMOVE)
+    List<Comment> comments;
 
     @OneToMany(mappedBy = "reactionTableId",cascade = CascadeType.REMOVE)
     List<Reaction> reactions;
+    @ManyToMany()
+    @JoinTable(
+            name = "topics_of_question",
+            joinColumns = @JoinColumn(name = "question_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id")
+    )
+    Set<Topic> topics;
+    @OneToMany(mappedBy = "bookmarkTableId",cascade = CascadeType.REMOVE)
+    List<Bookmark> bookmarks;
 
     @Formula("(SELECT COUNT(*) FROM reactions r WHERE r.reaction_table_id = id)")
     Integer reactionCount;
     @Formula("(SELECT COUNT(*) FROM comments c WHERE c.commentable_id = id)")
-    Integer repliesCount;
-
+    Integer commentCount;
 
 
     @Column(updatable = false)
@@ -50,5 +56,7 @@ public class Comment {
     Instant createdAt;
     @UpdateTimestamp
     Instant updatedAt;
+
+
 
 }

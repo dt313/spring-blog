@@ -65,15 +65,16 @@ public class AuthenticationServiceImp implements AuthenticationService {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticatedRequest req) {
+        System.out.println(req);
         var user = userRepository.findByEmail(req.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         boolean isAuthenticated = passwordEncoder.matches(req.getPassword(), user.getPassword());
 
         if(!isAuthenticated) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.WRONG_PASSWORKD);
         }
 
         String token = generateToken(user);
-        return AuthenticationResponse.builder().authenticated(isAuthenticated).token(token).build();
+        return AuthenticationResponse.builder().authenticated(isAuthenticated).token(token).userId(user.getId()).build();
     }
 
     @Override
@@ -90,8 +91,6 @@ public class AuthenticationServiceImp implements AuthenticationService {
                 .build();
 
         invalidTokenRepository.save(invalidToken);
-
-
     }
 
     public AuthenticationResponse refresh(String request) throws ParseException, JOSEException {

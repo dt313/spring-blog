@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -21,8 +22,8 @@ public class UserResponse {
      String username;
      String password;
      Set<Role> roles;
-//     LocalDateTime createdAt;
-//     LocalDateTime updatedAt;
+     Instant createdAt;
+     Instant updatedAt;
 
 }
 

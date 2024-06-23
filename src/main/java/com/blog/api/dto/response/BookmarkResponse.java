@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,4 +20,6 @@ public class BookmarkResponse {
     TableType bookmarkTableType;
     @ManyToOne
     BasicUserResponse bookmarkedUser;
+    Instant createdAt;
+    Instant updatedAt;
 }

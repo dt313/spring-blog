@@ -5,6 +5,13 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -13,12 +20,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentResponse {
     String id;
-    String artId;
-    String parentId;
+    String commentableId;
     BasicUserResponse publisher;
     @Enumerated(EnumType.STRING)
     TableType commentType;
     String content;
-    boolean isReply;
+    Integer repliesCount;
+    Integer reactionCount;
     boolean isApproved;
+    Instant createdAt;
+    Instant updatedAt;
 }

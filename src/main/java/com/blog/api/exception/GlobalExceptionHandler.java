@@ -24,7 +24,6 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         errorResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
-        System.out.println(ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 

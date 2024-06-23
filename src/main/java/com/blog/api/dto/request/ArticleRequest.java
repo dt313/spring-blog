@@ -13,7 +13,6 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
 public class ArticleRequest {
-    String author;
     String title;
     String metaTitle;
     String content;

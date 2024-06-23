@@ -10,9 +10,9 @@ import java.util.List;
 
 @Service
 public interface BookmarkService {
-    public List<Object> getAllBookmarkedArticleByType(TableType typeTable,String userId);
+    public List<ArticleResponse> getAllArticleBookmarkedByUser(String userId);
     public boolean checkIsBookmarked(TableType type, String bookmarkTableId, String userId);
-    public void toggle(BookmarkRequest request);
+    public boolean toggle(BookmarkRequest request);
     public List<BookmarkResponse> getAll();
     public Integer countOfBookmarkByBookmarkTableId(String id);
 }

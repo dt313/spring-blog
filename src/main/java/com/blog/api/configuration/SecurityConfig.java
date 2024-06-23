@@ -13,6 +13,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -20,35 +26,48 @@ import org.springframework.security.web.SecurityFilterChain;
 
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINTS = {
-            "/api/v1/users",
-            "/api/v1/auth/login",
-            "/api/v1/auth/introspect",
-            "/api/v1/auth/refresh",
-            "/h2-console",
+    private final String[] GET_METHOD_PUBLIC_ENDPOINTS = {
+            "/api/v1/articles/**",
+            "/api/v1/users/**",
+            "/api/v1/topics",
+            "/api/v1/reaction",
+            "/api/v1/reaction/**",
+            "/api/v1/bookmark/**",
+            "/api/v1/bookmark",
+            "/api/v1/comments/**",
+            "/api/v1/questions/**",
+            "/api/v1/questions",
     };
 
+    private final String[] POST_METHOD_PUBLIC_ENDPOINTS = {
+            "/api/v1/auth/login",
+            "/api/v1/auth/logout",
+            "/api/v1/auth/introspect",
+            "/api/v1/auth/refresh",
+            "/api/v1/users",
+            "/api/v1/articles/suggestion",
+    };
     CustomJwtDecoder customJwtDecoder;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 
-//            httpSecurity.authorizeHttpRequests(request ->
-//                    request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-////                            .requestMatchers(HttpMethod.GET, "/api/v1/users")
-////                            .hasAuthority("ROLE_ADMIN")
-//                            .anyRequest()
-//                            .authenticated()
-//            );
-//
-//            httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
-//                            jwtConfigurer.decoder(customJwtDecoder)
-//                                    .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-//                    .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
-//
-//
-            httpSecurity.csrf(AbstractHttpConfigurer::disable);
+            httpSecurity.authorizeHttpRequests(request ->
+                    request.requestMatchers(HttpMethod.POST, POST_METHOD_PUBLIC_ENDPOINTS).permitAll()
+                            .requestMatchers(HttpMethod.GET, GET_METHOD_PUBLIC_ENDPOINTS).permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/v1/users/me").authenticated()
+                            .requestMatchers(HttpMethod.POST, "/api/v1/articles").authenticated()
+//                            .requestMatchers(HttpMethod.GET, "/api/v1/users")
+//                            .hasAuthority("ROLE_ADMIN")
+                            .anyRequest()
+                            .authenticated()
+            );
 
+            httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
+                            jwtConfigurer.decoder(customJwtDecoder)
+                                    .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                    .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
+            httpSecurity.csrf(AbstractHttpConfigurer::disable).cors(Customizer.withDefaults());
         return httpSecurity.build();
     }
 
@@ -67,5 +86,14 @@ public class SecurityConfig {
     }
 
 
-
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

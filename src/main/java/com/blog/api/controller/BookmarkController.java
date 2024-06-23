@@ -1,10 +1,10 @@
 package com.blog.api.controller;
 
 import com.blog.api.dto.request.BookmarkRequest;
+import com.blog.api.dto.response.ArticleResponse;
 import com.blog.api.dto.response.BookmarkResponse;
 import com.blog.api.entities.ResponseObject;
 import com.blog.api.service.BookmarkService;
-import com.blog.api.types.ReactionTableType;
 import com.blog.api.types.TableType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,16 @@ public class BookmarkController {
     @GetMapping("")
     ResponseEntity<ResponseObject> getAll() {
         List<BookmarkResponse> result = bookmarkService.getAll();
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(
+                HttpStatus.OK,"success", result
+        ));
+    }
+
+    @GetMapping("/byUser/{id}")
+    ResponseEntity<ResponseObject> checkIsBookmarked(
+            @PathVariable(required = true) String id
+    ) {
+        List<ArticleResponse> result = bookmarkService.getAllArticleBookmarkedByUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(
                 HttpStatus.OK,"success", result
         ));
@@ -52,9 +62,9 @@ public class BookmarkController {
 
     @PostMapping("/toggle")
     ResponseEntity<ResponseObject> toggle(@RequestBody BookmarkRequest request) {
-         bookmarkService.toggle(request);
+        boolean isBookmarked =  bookmarkService.toggle(request);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(
-                HttpStatus.OK,"success", null
+                HttpStatus.OK,"success", isBookmarked
         ));
     }
 }

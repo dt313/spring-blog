@@ -11,8 +11,6 @@ public interface CommentMapper {
     @Mapping(target = "publisher", ignore = true)
     Comment toComment(CommentCreationRequest request);
     @Mapping(target = "publisher", ignore = true)
-    @Mapping(target = "isReply", source="reply")
-    @Mapping(target = "isApproved", source="approved")
     CommentResponse toCommentResponse(Comment comment);
 
 }

@@ -2,6 +2,7 @@ select * from user_sequences;
 SELECT owner, table_name FROM all_tables where owner='DT313';
 
 select * from comments;
+select * from users;
 select * from articles;
 select * from reactions;
 select * from bookmark;
