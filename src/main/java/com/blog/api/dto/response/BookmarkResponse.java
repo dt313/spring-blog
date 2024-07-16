@@ -20,6 +20,7 @@ public class BookmarkResponse {
     TableType bookmarkTableType;
     @ManyToOne
     BasicUserResponse bookmarkedUser;
+    Object content;
     Instant createdAt;
     Instant updatedAt;
 }

@@ -14,5 +14,4 @@ public interface BookmarkMapper {
     Bookmark toBookmark(BookmarkRequest request);
     @Mapping(target = "bookmarkedUser", ignore = true)
     BookmarkResponse toBookmarkResponse(Bookmark bookmark);
-
 }

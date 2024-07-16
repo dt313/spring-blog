@@ -13,8 +13,8 @@ import java.util.Set;
 
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, String> {
-    public boolean existsByTitle(String title);
-    public List<Article> findAllByAuthor(User author);
+    boolean existsByTitle(String title);
+    List<Article> findAllByAuthor(User author);
     @Query("SELECT e FROM Article e WHERE e.title LIKE %:word% OR e.metaTitle LIKE %:word% OR e.content LIKE %:word%"  )
     List<Article> findByTitleContaining(@Param("word")String title, PageRequest pageRequest);
     @Query("SELECT e FROM Article e WHERE e.title LIKE %:word% OR e.metaTitle LIKE %:word% OR e.content LIKE %:word%"  )

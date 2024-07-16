@@ -54,6 +54,8 @@ public class SecurityConfig {
             httpSecurity.authorizeHttpRequests(request ->
                     request.requestMatchers(HttpMethod.POST, POST_METHOD_PUBLIC_ENDPOINTS).permitAll()
                             .requestMatchers(HttpMethod.GET, GET_METHOD_PUBLIC_ENDPOINTS).permitAll()
+                            .requestMatchers("/api/v1/notification").permitAll()
+                            .requestMatchers(HttpMethod.GET,"/api/v1/notifications").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/v1/users/me").authenticated()
                             .requestMatchers(HttpMethod.POST, "/api/v1/articles").authenticated()
 //                            .requestMatchers(HttpMethod.GET, "/api/v1/users")

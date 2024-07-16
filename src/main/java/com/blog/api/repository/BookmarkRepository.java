@@ -13,4 +13,5 @@ public interface BookmarkRepository extends JpaRepository<Bookmark,String> {
     List<Bookmark> findAllByBookmarkTableId(String id);
     List<Bookmark> findAllByBookmarkedUser(User userId);
     Bookmark findByBookmarkTableIdAndBookmarkedUser(String id, User userId);
+    boolean existsByBookmarkTableIdAndBookmarkedUser(String id, User userId);
 }

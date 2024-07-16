@@ -10,10 +10,9 @@ import com.blog.api.exception.AppException;
 import com.blog.api.exception.ErrorCode;
 import com.blog.api.mapper.ArticleMapper;
 import com.blog.api.mapper.UserMapper;
-import com.blog.api.repository.ArticleRepository;
-import com.blog.api.repository.TopicRepository;
-import com.blog.api.repository.UserRepository;
+import com.blog.api.repository.*;
 import com.blog.api.service.ArticleService;
+import com.blog.api.utils.TableUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,13 +35,20 @@ public class ArticleServiceImp implements ArticleService {
     TopicRepository topicRepository;
     ArticleMapper articleMapper;
     UserMapper userMapper;
+    TableUtils tableUtils;
     @Override
     public List<ArticleResponse> getAll(String searchValue ,int pageNumber, int pageSize) {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        User user = userRepository.findByUsername(username).orElse(null);
         Sort sort = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(pageNumber -1, pageSize, sort);
         List<ArticleResponse> articles = articleRepository.findByTitleContaining(searchValue,pageRequest).stream().map((article) -> {
            ArticleResponse temp = articleMapper.toArticleResponse(article);
+            temp.setBookmarked(tableUtils.checkIsBookmarked(temp.getId(), user ));
+            temp.setReacted(tableUtils.checkIsReacted(temp.getId(), user ));
            temp.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
+
            return temp;
         }).toList();
         return articles;
@@ -51,10 +57,16 @@ public class ArticleServiceImp implements ArticleService {
 
     @Override
     public List<ArticleResponse> getAllByTopic(String name,int pageNumber, int pageSize ) {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        User user = userRepository.findByUsername(username).orElse(null);
+
         Sort sort = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(pageNumber -1, pageSize, sort);
         List<ArticleResponse> articles = articleRepository.findByTopicName(name, pageRequest).stream().map((article) -> {
             ArticleResponse temp = articleMapper.toArticleResponse(article);
+            temp.setBookmarked(tableUtils.checkIsBookmarked(temp.getId(), user ));
+            temp.setReacted(tableUtils.checkIsReacted(temp.getId(), user ));
             temp.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
             return temp;
         }).toList();
@@ -64,9 +76,14 @@ public class ArticleServiceImp implements ArticleService {
 
     @Override
     public ArticleResponse getById(String id) {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        User user = userRepository.findByUsername(username).orElse(null);
         Article article = articleRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.ARTICLE_NOT_FOUND));
 
+        article.setBookmarked(tableUtils.checkIsBookmarked(article.getId(), user));
+        article.setReacted(tableUtils.checkIsReacted(article.getId(), user ));
         ArticleResponse response  = articleMapper.toArticleResponse(article);
         response.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
 
@@ -115,7 +132,6 @@ public class ArticleServiceImp implements ArticleService {
         // Topic
         Set<Topic> topics = getListTopics(request.getTopics());
         article.setTopics(topics);
-
         // Response
         ArticleResponse articleResponse = articleMapper.toArticleResponse(articleRepository.save(article));
         articleResponse.setAuthor(userMapper.toBasicUserResponse(author));
@@ -134,13 +150,15 @@ public class ArticleServiceImp implements ArticleService {
         Article article = articleRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.ARTICLE_NOT_FOUND));
 
+        article.setBookmarked(tableUtils.checkIsBookmarked(article.getId(), author ));
+        article.setReacted(tableUtils.checkIsReacted(article.getId(), author ));
+
         articleMapper.updateArticle(article, updateArticle);
 
        // Compare author
         if(!Objects.equals(article.getAuthor().getUsername(), username)) throw
                 new AppException(ErrorCode.UNAUTHORIZED);
 
-        System.out.println(article);
         // Remove Topic
         deleteOldTopic(article.getTopics());
 
@@ -213,6 +231,8 @@ public class ArticleServiceImp implements ArticleService {
 
         }
     }
+
+
 
 
 

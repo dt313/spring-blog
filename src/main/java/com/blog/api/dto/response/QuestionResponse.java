@@ -1,6 +1,9 @@
 package com.blog.api.dto.response;
 
 import com.blog.api.entities.Topic;
+import com.blog.api.types.TableType;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Formula;
@@ -15,6 +18,7 @@ import java.util.Set;
 @AllArgsConstructor
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class QuestionResponse {
     String id;
     BasicUserResponse author;
@@ -22,6 +26,11 @@ public class QuestionResponse {
     Integer reactionCount;
     Integer commentCount;
     Set<Topic> topics = new HashSet<>();
+    TableType tableType = TableType.QUESTION;
+    @JsonProperty("is_bookmarked")
+    boolean isBookmarked;
+    @JsonProperty("is_reacted")
+    boolean isReacted;
     Instant createdAt;
     Instant updatedAt;
 }

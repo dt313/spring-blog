@@ -17,7 +17,6 @@ import java.util.*;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "articles")
-@EntityListeners(AuditingEntityListener.class)
 public class Article {
 
 
@@ -31,7 +30,7 @@ public class Article {
     String content;
     String metaTitle;
     String description;
-    String thumbnail;
+    String thumbnail = "";
     @ManyToMany()
     @JoinTable(
             name = "topics_of_article",
@@ -49,16 +48,18 @@ public class Article {
     List<Bookmark> bookmarks;
 
     @Formula("(SELECT COUNT(*) FROM reactions r WHERE r.reaction_table_id = id)")
-    Integer reactionCount;
+    Integer reactionCount = 0;
     @Formula("(SELECT COUNT(*) FROM comments c WHERE c.commentable_id = id)")
-    Integer commentCount;
+    Integer commentCount = 0;
+    @Transient
+    boolean isBookmarked;
+    @Transient
+    boolean isReacted;
 
     @Column(updatable = false)
     @CreationTimestamp
     Instant createdAt;
     @UpdateTimestamp
     Instant updatedAt;
-
-
 
 }

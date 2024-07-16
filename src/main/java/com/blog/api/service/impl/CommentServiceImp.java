@@ -2,7 +2,6 @@ package com.blog.api.service.impl;
 
 import com.blog.api.dto.request.CommentCreationRequest;
 import com.blog.api.dto.response.CommentResponse;
-import com.blog.api.entities.Article;
 import com.blog.api.entities.Comment;
 import com.blog.api.entities.User;
 import com.blog.api.exception.AppException;
@@ -15,14 +14,16 @@ import com.blog.api.repository.QuestionRepository;
 import com.blog.api.repository.UserRepository;
 import com.blog.api.service.CommentService;
 import com.blog.api.types.TableType;
+import com.blog.api.utils.TableUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.aop.framework.AopConfigException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,9 +37,11 @@ public class CommentServiceImp implements CommentService {
     ArticleRepository articleRepository;
     UserMapper userMapper;
     CommentMapper commentMapper;
+    TableUtils tableUtils;
 
     @Override
     public CommentResponse create(CommentCreationRequest request) {
+        System.out.println(request);
         User publisher = userRepository.findById(request.getPublisher()).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
         Object isExist = new Object();
@@ -57,8 +60,12 @@ public class CommentServiceImp implements CommentService {
             Comment newComment = commentMapper.toComment(request);
             newComment.setPublisher(publisher);
             newComment.setApproved(true);
-
+            newComment.setReplies(new ArrayList<>());
+            newComment.setRepliesCount(0);
+            newComment.setReactionCount(0);
+            System.out.println(newComment);
             CommentResponse commentResponse = commentMapper.toCommentResponse(commentRepository.save(newComment));
+            System.out.println(commentResponse);
             commentResponse.setPublisher(userMapper.toBasicUserResponse(publisher));
             return commentResponse;
         }
@@ -84,10 +91,14 @@ public class CommentServiceImp implements CommentService {
             isExist = questionRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
         }
 
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        User commentator = userRepository.findByUsername(username).orElse(null);
+
         if(Objects.nonNull(isExist)) {
             List<Comment> comments = commentRepository.findAllByCommentTypeAndCommentableId(type,id, pageRequest);
-
             List<CommentResponse> commentsResponse = comments.stream().map((comment) -> {
+                comment.setReacted(tableUtils.checkIsReacted(comment.getId(), commentator));
                 CommentResponse commentResponse = commentMapper.toCommentResponse(commentRepository.save(comment));
                 commentResponse.setPublisher(userMapper.toBasicUserResponse(comment.getPublisher()));
                 return commentResponse;
@@ -100,10 +111,16 @@ public class CommentServiceImp implements CommentService {
     @Override
     public List<CommentResponse> getAllComment() {
         List<Comment> comments = commentRepository.findAll();
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        User commentator = userRepository.findByUsername(username).orElse(null);
 
         List<CommentResponse> commentsResponse = comments.stream().map((comment) -> {
+            comment.setReacted(tableUtils.checkIsReacted(comment.getCommentableId(), commentator));
+
             CommentResponse commentResponse = commentMapper.toCommentResponse(commentRepository.save(comment));
             commentResponse.setPublisher(userMapper.toBasicUserResponse(comment.getPublisher()));
+
             return commentResponse;
         }).toList();
         return commentsResponse;
@@ -113,6 +130,12 @@ public class CommentServiceImp implements CommentService {
     public CommentResponse getById(String id) {
         Comment comment = commentRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.COMMENT_NOT_FOUND));
+
+        var context = SecurityContextHolder.getContext();
+
+        String username = context.getAuthentication().getName();
+        User commentator = userRepository.findByUsername(username).orElse(null);
+        comment.setReacted(tableUtils.checkIsReacted(comment.getCommentableId(), commentator));
 
         CommentResponse commentResponse = commentMapper.toCommentResponse(comment);
         commentResponse.setPublisher(userMapper.toBasicUserResponse(comment.getPublisher()));

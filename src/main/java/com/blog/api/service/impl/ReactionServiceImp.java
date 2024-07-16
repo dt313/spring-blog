@@ -8,10 +8,7 @@ import com.blog.api.exception.AppException;
 import com.blog.api.exception.ErrorCode;
 import com.blog.api.mapper.ReactionMapper;
 import com.blog.api.mapper.UserMapper;
-import com.blog.api.repository.ArticleRepository;
-import com.blog.api.repository.CommentRepository;
-import com.blog.api.repository.ReactionRepository;
-import com.blog.api.repository.UserRepository;
+import com.blog.api.repository.*;
 import com.blog.api.service.ReactionService;
 import com.blog.api.types.ReactionType;
 import com.blog.api.types.TableType;
@@ -29,6 +26,7 @@ import java.util.Objects;
 public class ReactionServiceImp implements ReactionService {
     ReactionRepository reactionRepository;
     ArticleRepository articleRepository;
+    QuestionRepository questionRepository;
     UserRepository userRepository;
     CommentRepository commentRepository;
 
@@ -147,7 +145,10 @@ public class ReactionServiceImp implements ReactionService {
                 );
                 return true;
             case TableType.QUESTION:
-                return false;
+                questionRepository.findById(id).orElseThrow(
+                        () -> new AppException(ErrorCode.QUESTION_NOT_FOUND)
+                );
+                return true;
 
             case TableType.COMMENT:
                 commentRepository.findById(id).orElseThrow(

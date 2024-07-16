@@ -53,7 +53,9 @@ public enum ErrorCode {
 
     NO_TYPE_TABLE(1234, "Type of table is not found", HttpStatus.NOT_FOUND),
 
-    QUESTION_NOT_FOUND(1234, "Question is not found", HttpStatus.NOT_FOUND)
+    QUESTION_NOT_FOUND(1234, "Question is not found", HttpStatus.NOT_FOUND),
+
+    NOTIFICATION_NOT_FOUND(1234, "Notification is not found", HttpStatus.NOT_FOUND)
 
     ;
 

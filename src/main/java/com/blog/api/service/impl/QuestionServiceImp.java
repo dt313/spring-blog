@@ -16,6 +16,7 @@ import com.blog.api.repository.QuestionRepository;
 import com.blog.api.repository.TopicRepository;
 import com.blog.api.repository.UserRepository;
 import com.blog.api.service.QuestionService;
+import com.blog.api.utils.TableUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,14 +42,22 @@ public class QuestionServiceImp implements QuestionService {
     TopicRepository topicRepository;
     UserMapper userMapper;
     QuestionMapper questionMapper;
+    TableUtils tableUtils;
     @Override
     public List<QuestionResponse> getAll(String searchValue, int pageNumber, int pageSize) {
         Sort sort = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(pageNumber -1, pageSize, sort);
 
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        User author = userRepository.findByUsername(username).orElse(null);
+
+
         List<QuestionResponse> questions = questionRepository.findByContentContaining(searchValue,pageRequest)
                 .stream().map((question) -> {
             QuestionResponse temp = questionMapper.toQuestionResponse(question);
+                    temp.setBookmarked(tableUtils.checkIsBookmarked(temp.getId(), author ));
+                    temp.setReacted(tableUtils.checkIsReacted(temp.getId(), author ));
             temp.setAuthor(userMapper.toBasicUserResponse(question.getAuthor()));
             return temp;
         }).toList();
@@ -72,8 +81,15 @@ public class QuestionServiceImp implements QuestionService {
     public List<QuestionResponse> getAllByTopic(String name, int pageNumber, int pageSize) {
         Sort sort = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(pageNumber -1, pageSize, sort);
+
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        User author = userRepository.findByUsername(username).orElse(null);
+
         List<QuestionResponse> questions = questionRepository.findByTopicName(name, pageRequest).stream().map((question) -> {
             QuestionResponse temp = questionMapper.toQuestionResponse(question);
+            temp.setBookmarked(tableUtils.checkIsBookmarked(temp.getId(), author ));
+            temp.setReacted(tableUtils.checkIsReacted(temp.getId(), author ));
             temp.setAuthor(userMapper.toBasicUserResponse(question.getAuthor()));
             return temp;
         }).toList();
@@ -84,9 +100,15 @@ public class QuestionServiceImp implements QuestionService {
     public QuestionResponse getById(String id) {
         Question question = questionRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.ARTICLE_NOT_FOUND));
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        User author = userRepository.findByUsername(username).orElse(null);
 
+        question.setBookmarked(tableUtils.checkIsBookmarked(question.getId(), author ));
+        question.setReacted(tableUtils.checkIsReacted(question.getId(), author ));
         QuestionResponse questionResponse = questionMapper.toQuestionResponse(question);
         questionResponse.setAuthor(userMapper.toBasicUserResponse(question.getAuthor()));
+
 
         return questionResponse;
     }
@@ -95,17 +117,20 @@ public class QuestionServiceImp implements QuestionService {
     public QuestionResponse create(QuestionRequest request) {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
-        System.out.println(username);
         User author = userRepository.findByUsername(username).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
         // Author
-        Question article = questionMapper.toQuestion(request);
-        article.setAuthor(author);
+        Question question = questionMapper.toQuestion(request);
+        question.setAuthor(author);
         // Topic
         Set<Topic> topics = getListTopics(request.getTopics());
-        article.setTopics(topics);
+        question.setTopics(topics);
+
+        question.setBookmarked(tableUtils.checkIsBookmarked(question.getId(), author ));
+        question.setReacted(tableUtils.checkIsReacted(question.getId(), author ));
+
         // Response
-        QuestionResponse questionResponse = questionMapper.toQuestionResponse(questionRepository.save(article));
+        QuestionResponse questionResponse = questionMapper.toQuestionResponse(questionRepository.save(question));
         questionResponse.setAuthor(userMapper.toBasicUserResponse(author));
 
         return questionResponse;
@@ -113,7 +138,6 @@ public class QuestionServiceImp implements QuestionService {
 
     @Override
     public QuestionResponse update(String id, QuestionRequest request) {
-        System.out.println(request);
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
         // Author
@@ -121,9 +145,13 @@ public class QuestionServiceImp implements QuestionService {
                 new AppException(ErrorCode.USER_NOT_FOUND));
 
         Question question = questionRepository.findById(id).orElseThrow(() ->
-                new AppException(ErrorCode.ARTICLE_NOT_FOUND));
+                new AppException(ErrorCode.QUESTION_NOT_FOUND));
 
+        question.setBookmarked(tableUtils.checkIsBookmarked(question.getId(), author ));
+        question.setReacted(tableUtils.checkIsReacted(question.getId(), author ));
+        question.setTopics(new HashSet<>());
         questionMapper.updateQuestion(question, request);
+
         // Compare author
         if(!Objects.equals(question.getAuthor().getUsername(), username)) throw
                 new AppException(ErrorCode.UNAUTHORIZED);
@@ -191,6 +219,7 @@ public class QuestionServiceImp implements QuestionService {
                     topicRepository.save(temp);
 
                 }else {
+                    System.out.println("DELEDE");
                     topicRepository.deleteById(temp.getName());
                 }
             }else continue;

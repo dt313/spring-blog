@@ -46,11 +46,14 @@ public class Question {
     List<Bookmark> bookmarks;
 
     @Formula("(SELECT COUNT(*) FROM reactions r WHERE r.reaction_table_id = id)")
-    Integer reactionCount;
+    Integer reactionCount = 0;
     @Formula("(SELECT COUNT(*) FROM comments c WHERE c.commentable_id = id)")
-    Integer commentCount;
+    Integer commentCount = 0;
 
-
+    @Transient
+    boolean isBookmarked = false;
+    @Transient
+    boolean isReacted = false;
     @Column(updatable = false)
     @CreationTimestamp
     Instant createdAt;

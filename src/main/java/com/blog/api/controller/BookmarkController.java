@@ -34,7 +34,7 @@ public class BookmarkController {
     ResponseEntity<ResponseObject> checkIsBookmarked(
             @PathVariable(required = true) String id
     ) {
-        List<ArticleResponse> result = bookmarkService.getAllArticleBookmarkedByUser(id);
+        List<BookmarkResponse> result = bookmarkService.getAllArticleBookmarkedByUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(
                 HttpStatus.OK,"success", result
         ));

@@ -41,7 +41,7 @@ public class UserServiceImp implements UserService {
     public UserResponse getMyInformation() {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
-
+        System.out.println(context);
         User user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toUserResponse(user);
 

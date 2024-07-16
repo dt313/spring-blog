@@ -1,29 +1,25 @@
 package com.blog.api.service.impl;
 
 import com.blog.api.dto.request.BookmarkRequest;
-import com.blog.api.dto.response.ArticleResponse;
-import com.blog.api.dto.response.BasicUserResponse;
-import com.blog.api.dto.response.BookmarkResponse;
+import com.blog.api.dto.response.*;
 import com.blog.api.entities.*;
 import com.blog.api.exception.AppException;
 import com.blog.api.exception.ErrorCode;
 import com.blog.api.mapper.ArticleMapper;
 import com.blog.api.mapper.BookmarkMapper;
+import com.blog.api.mapper.QuestionMapper;
 import com.blog.api.mapper.UserMapper;
 import com.blog.api.repository.ArticleRepository;
 import com.blog.api.repository.BookmarkRepository;
 import com.blog.api.repository.QuestionRepository;
 import com.blog.api.repository.UserRepository;
 import com.blog.api.service.BookmarkService;
-import com.blog.api.service.QuestionService;
 import com.blog.api.types.TableType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
 
-import java.awt.print.Book;
-import java.lang.reflect.Array;
 import java.util.*;
 
 @Component
@@ -35,29 +31,50 @@ public class BookmarkServiceImp implements BookmarkService {
     UserRepository userRepository;
     BookmarkMapper bookmarkMapper;
     QuestionRepository questionRepository;
+    QuestionMapper questionMapper;
     ArticleMapper articleMapper;
     UserMapper userMapper;
 
     @Override
-    public List<ArticleResponse> getAllArticleBookmarkedByUser(String userId) {
+    public List<BookmarkResponse> getAllArticleBookmarkedByUser(String userId) {
         User bookmarkedUser = userRepository.findById(userId).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        List<Bookmark> bookmarks = bookmarkRepository.findAllByBookmarkedUser(bookmarkedUser);
+        List<BookmarkResponse> bookmarks = bookmarkRepository.findAllByBookmarkedUser(bookmarkedUser).stream().map((bookmark) -> {
+            return bookmarkMapper.toBookmarkResponse(bookmark);
+        }).toList();
+
         if(bookmarks.isEmpty()) {
             return  new ArrayList<>();
         }else {
-            List<ArticleResponse> articles = bookmarks.stream().map((bookmark) -> {
-                Article article = articleRepository.findById(bookmark.getBookmarkTableId()).orElse(null);
-                ArticleResponse articleResponse = new ArticleResponse();
-                if(Objects.nonNull(article)) {
-                    articleResponse = articleMapper.toArticleResponse(article);
-                    articleResponse.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
+
+            List<BookmarkResponse> newBookmarks = bookmarks.stream().map((bookmark) -> {
+                if(bookmark.getBookmarkTableType().equals(TableType.ARTICLE)) {
+                    Article article = articleRepository.findById(bookmark.getBookmarkTableId()).orElse(null);
+                    ArticleResponse articleResponse = new ArticleResponse();
+                    if(Objects.nonNull(article)) {
+                        articleResponse = articleMapper.toArticleResponse(article);
+                        articleResponse.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
+                    }
+                    bookmark.setContent(articleResponse);
+                    return bookmark;
+
+                }else {
+                    Question question = questionRepository.findById(bookmark.getBookmarkTableId()).orElse(null);
+                    QuestionResponse questionResponse = new QuestionResponse();
+                    if(Objects.nonNull(question)) {
+                        questionResponse = questionMapper.toQuestionResponse(question);
+                        questionResponse.setAuthor(userMapper.toBasicUserResponse(question.getAuthor()));
+                    }
+                    bookmark.setContent(questionResponse);
+                    return bookmark;
                 }
-                return articleResponse;
+
             }).toList();
 
-            return articles;
+            System.out.println(newBookmarks);
+
+            return newBookmarks;
         }
     }
 
