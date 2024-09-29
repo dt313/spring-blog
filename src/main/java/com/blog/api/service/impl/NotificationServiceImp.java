@@ -1,23 +1,23 @@
 package com.blog.api.service.impl;
 
 import com.blog.api.dto.request.NotificationRequest;
+import com.blog.api.dto.response.CommentDirect;
 import com.blog.api.dto.response.NotificationResponse;
-import com.blog.api.dto.response.QuestionResponse;
 import com.blog.api.entities.Article;
+import com.blog.api.entities.Comment;
 import com.blog.api.entities.Notification;
-import com.blog.api.entities.Question;
 import com.blog.api.entities.User;
 import com.blog.api.exception.AppException;
 import com.blog.api.exception.ErrorCode;
 import com.blog.api.mapper.ArticleMapper;
 import com.blog.api.mapper.NotificationMapper;
-import com.blog.api.mapper.QuestionMapper;
 import com.blog.api.mapper.UserMapper;
 import com.blog.api.repository.ArticleRepository;
+import com.blog.api.repository.CommentRepository;
 import com.blog.api.repository.NotificationRepository;
-import com.blog.api.repository.QuestionRepository;
 import com.blog.api.repository.UserRepository;
 import com.blog.api.service.NotificationService;
+import com.blog.api.types.NotificationType;
 import com.blog.api.types.TableType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -43,8 +44,7 @@ public class NotificationServiceImp implements NotificationService {
     NotificationMapper notificationMapper;
     ArticleRepository articleRepository;
     ArticleMapper articleMapper;
-    QuestionRepository questionRepository;
-    QuestionMapper questionMapper;
+    CommentRepository commentRepository;
 
 
     @Override
@@ -53,8 +53,6 @@ public class NotificationServiceImp implements NotificationService {
         List<NotificationResponse> notificationsResponse = new ArrayList<>();
 
         List<Notification> notifications = notificationRepository.findAll();
-        log.info("NOTIFICATION " + notifications);
-
         notificationsResponse = notifications.stream().map((notification) -> {
             NotificationResponse notificationResponse = notificationMapper.toNotificationResponse(notification);
             notificationResponse.setSender(userMapper.toBasicUserResponse(notification.getSender()));
@@ -66,40 +64,51 @@ public class NotificationServiceImp implements NotificationService {
     }
 
     @Override
-    public List<NotificationResponse> getAllByUser(String id , int pageNumber, int pageSize) {
+    public List<NotificationResponse> getAllByUser(Long id, int pageNumber, int pageSize) {
+
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
-        Sort sort = Sort.by("createdAt").descending();
-        PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize, sort);
         User user = userRepository.findByUsername(username).orElse(null);
 
-        if(!user.getId().equals(id)) throw new AppException(ErrorCode.USER_CONFLICT);
+        Sort sort = Sort.by("createdAt").descending();
+        PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize, sort);
+
+        if (!user.getId().equals(id)) {
+            throw new AppException(ErrorCode.USER_CONFLICT);
+        }
 
         List<Notification> notifications = notificationRepository.findAllByReceiver(user, pageRequest);
+
         List<NotificationResponse> notificationResponses = notifications.stream().map((notification)-> {
             NotificationResponse notificationResponse = notificationMapper.toNotificationResponse(notification);
             User sender = userRepository.findById(notification.getSender().getId()).orElse(null);
             notificationResponse.setSender(userMapper.toBasicUserResponse(sender));
             notificationResponse.setReceiver(userMapper.toBasicUserResponse(user));
 
-            if(notification.getContextType().equals(TableType.QUESTION)) {
-                Question question = questionRepository.findById(notification.getContextId()).orElse(null);
-                notificationResponse.setContext(question.getContent());
-            }else if(notification.getContextType().equals(TableType.ARTICLE)) {
+            if (notification.getContextType().equals(TableType.ARTICLE)) {
                 Article article = articleRepository.findById(notification.getContextId()).orElse(null);
-                notificationResponse.setContext(article.getTitle());
+                notificationResponse.setContext(articleMapper.toArticleResponse(article));
+            }
+
+            if (notification.getDirectObjectType().equals(TableType.COMMENT)) {
+                Comment comment = commentRepository.findById(notification.getDirectObjectId()).orElse(null);
+
+                if(Objects.nonNull(comment) && comment.getCommentType().equals(TableType.COMMENT)) {
+                    CommentDirect commentDirect =
+                            CommentDirect.builder().direct_id(comment.getId()).parentId(comment.getCommentableId()).build();
+                        notificationResponse.setDirectObject(commentDirect);
+                }
+
             }
 
             return notificationResponse;
         }).toList();
-
 
         return notificationResponses;
     }
 
     @Override
     public NotificationResponse create(NotificationRequest notificationRequest) {
-
         User sender = userRepository.findById(notificationRequest.getSender()).orElseThrow(() ->
                 new AppException(ErrorCode.UNAUTHENTICATED));
         User receiver = userRepository.findById(notificationRequest.getReceiver()).orElseThrow(() ->
@@ -109,27 +118,54 @@ public class NotificationServiceImp implements NotificationService {
             throw new AppException(ErrorCode.USER_CONFLICT);
         }
 
+        // one day for reaction
+        if (notificationRequest.getType().equals(NotificationType.REACT_ARTICLE)
+                || notificationRequest.getType().equals(NotificationType.REACT_COMMENT)
+        ) {
+
+            List<Notification> exists = notificationRepository.findAllBySenderAndReceiverAndTypeAndDirectObjectId
+                    (sender, receiver, notificationRequest.getType(), notificationRequest.getDirectObjectId());
+
+            if (!exists.isEmpty()) {
+                Date oneDayAgo = Date.from(Instant.now().minus(1, ChronoUnit.MINUTES));
+                exists.sort(Comparator.comparing(Notification::getCreatedAt).reversed());
+                Date createdAt = Date.from(exists.get(0).getCreatedAt());
+
+                if (createdAt.before(new Date()) && createdAt.after(oneDayAgo)) {
+                    return null;
+                }
+            }
+        }
+
         Notification notification = notificationMapper.toNotification(notificationRequest);
         notification.setSender(sender);
         notification.setReceiver(receiver);
-        notification.setReaded(false);
         NotificationResponse notificationResponse =
                 notificationMapper.toNotificationResponse(notificationRepository.save(notification));
 
         notificationResponse.setSender(userMapper.toBasicUserResponse(notification.getSender()));
         notificationResponse.setReceiver(userMapper.toBasicUserResponse(notification.getReceiver()));
-        if(notification.getContextType().equals(TableType.QUESTION)) {
-            Question question = questionRepository.findById(notification.getContextId()).orElse(null);
-            notificationResponse.setContext(question.getContent());
-        }else if(notification.getContextType().equals(TableType.ARTICLE)) {
+
+
+        if (notification.getContextType().equals(TableType.ARTICLE)) {
             Article article = articleRepository.findById(notification.getContextId()).orElse(null);
-            notificationResponse.setContext(article.getTitle());
+            notificationResponse.setContext(articleMapper.toArticleResponse(article));
+        }
+
+        if (notification.getDirectObjectType().equals(TableType.COMMENT)) {
+            Comment comment = commentRepository.findById(notification.getDirectObjectId()).orElse(null);
+            if(Objects.nonNull(comment)) {
+                CommentDirect commentDirect =
+                        CommentDirect.builder().direct_id(comment.getId()).parentId(comment.getCommentableId()).build();
+                notificationResponse.setDirectObject(commentDirect);
+            }
+
         }
         return notificationResponse;
     }
 
     @Override
-    public boolean read(String id) {
+    public boolean read(Long id) {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
 
@@ -140,7 +176,6 @@ public class NotificationServiceImp implements NotificationService {
         });
 
         if (author.equals(notification.getReceiver())) {
-            System.out.println("SAME USER ");
             notification.setReaded(true);
             notificationRepository.save(notification);
             return true;
@@ -154,9 +189,8 @@ public class NotificationServiceImp implements NotificationService {
     public boolean readAll() {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
-
         User user = userRepository.findByUsername(username).orElseThrow(() ->
-                new AppException(ErrorCode.UNAUTHENTICATED)
+                new AppException(ErrorCode.USER_NOT_FOUND)
         );
 
         List<Notification> unReadedNotifications = notificationRepository.findAllByReceiverAndIsReaded(user, false);

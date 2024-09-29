@@ -25,19 +25,19 @@ public class PermissionController {
     @PostMapping("")
     ResponseEntity<ResponseObject> create(@RequestBody @Valid PermissionRequest request) {
         PermissionResponse result = permissionService.create(request);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK,"Create permission successfully",result));
     }
 
     @GetMapping("")
     ResponseEntity<ResponseObject> getAll() {
        List<PermissionResponse> result = permissionService.getAll();
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK,"Get all permission successfully",result));
     }
 
     @DeleteMapping("/{permission}")
     ResponseEntity<ResponseObject> delete(@PathVariable String permission) {
         permissionService.delete(permission);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",null));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK,"Delete permission successfully",null));
     }
 
 

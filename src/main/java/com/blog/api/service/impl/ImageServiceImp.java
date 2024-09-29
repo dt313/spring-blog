@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.zip.DataFormatException;
 
 @Component
@@ -33,19 +32,17 @@ public class ImageServiceImp implements ImageService {
                     .imageData(ImageUtils.compressImage(img.getBytes()))
                     .build();
 
-            var savedimg = imageRepository.save(imageToSave);
-            System.out.println("success to store image");
-            return savedimg.getId();
+            var savedImg = imageRepository.save(imageToSave);
+            return savedImg.getId();
         }catch (IOException e) {
-            System.out.println(e.getMessage());
+            return null;
         }
 
 
-        return null;
     }
     @Override
     public byte[] downloadImage(String id) throws DataFormatException, IOException {
-        Image dbImage = imageRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.REACTION_NOT_FOUND));
+        Image dbImage = imageRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.IMAGE_NOT_FOUND));
 
         return ImageUtils.decompressImage(dbImage.getImageData());
 

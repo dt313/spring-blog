@@ -12,10 +12,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReactionRequest {
-    private String reactionTableId;
+    private Long reactionTableId;
     @Enumerated(EnumType.STRING)
     private TableType reactionTableType;
     @Enumerated(EnumType.STRING)
     private ReactionType type;
-    private String reactedUser;
+    private Long reactedUser;
 }

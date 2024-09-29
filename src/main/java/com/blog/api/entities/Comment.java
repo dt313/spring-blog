@@ -1,7 +1,6 @@
 package com.blog.api.entities;
 
 import com.blog.api.types.TableType;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,40 +8,39 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@EntityListeners(AuditingEntityListener.class)
+//@EntityListeners(AuditingEntityListener.class)
 @Table(name = "comments")
 public class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
-    String commentableId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "comment_seq")
+    @SequenceGenerator(name = "comment_seq", sequenceName = "comment_seq", allocationSize = 1)
+    Long id;
+    Long commentableId;
     @Enumerated(EnumType.STRING)
     TableType commentType;
     @ManyToOne
     User publisher;
+
     String content;
 
     @OneToMany(mappedBy = "reactionTableId",cascade = CascadeType.REMOVE)
     List<Reaction> reactions;
 
     @Formula("COALESCE((SELECT COUNT(*) FROM reactions r WHERE r.reaction_table_id = id), 0)")
-    private Integer reactionCount;
-    @Formula("COALESCE((SELECT COUNT(*) FROM comments r WHERE r.commentable_id = id), 0)")
+    Integer reactionCount;
+    @Formula("COALESCE((SELECT COUNT(*) FROM comments c WHERE c.commentable_id = id and c.comment_type = 'COMMENT'), 0)")
     Integer repliesCount = 0;
 
     @Transient

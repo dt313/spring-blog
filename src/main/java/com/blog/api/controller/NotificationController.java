@@ -28,35 +28,35 @@ public class NotificationController {
             @RequestParam(required = false, defaultValue = "10") int pageSize
     ) {
         List <NotificationResponse> list = notificationService.getAll(pageNumber,pageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "Query all notifications successfully", list ));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Query all notifications successfully", list ));
     }
 
     @GetMapping("/{id}")
     private ResponseEntity<ResponseObject> getAllByUser(
             @RequestParam(required = false, defaultValue = "1") int pageNumber,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
-            @PathVariable String id
+            @PathVariable Long id
     ) {
         List <NotificationResponse> list = notificationService.getAllByUser(id, pageNumber,pageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "Query all notifications successfully", list ));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Query notification successfully", list ));
     }
 
     @PostMapping("")
     private ResponseEntity<ResponseObject> create(@RequestBody NotificationRequest notificationRequest) {
          NotificationResponse notification = notificationService.create(notificationRequest);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "create notification successfully", notification ));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "create notification successfully", notification ));
     }
 
 
     @GetMapping("/read/{id}")
-    private ResponseEntity<ResponseObject> read(@PathVariable String id) {
+    private ResponseEntity<ResponseObject> read(@PathVariable Long id) {
         boolean isReaded = notificationService.read(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "read notification successfully", isReaded ));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "read notification successfully", isReaded ));
     }
 
     @GetMapping("/read")
     private ResponseEntity<ResponseObject> readAll() {
         boolean isReadAll = notificationService.readAll();
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "read all successfully", isReadAll ));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "read all successfully", isReadAll ));
     }
 }

@@ -4,13 +4,10 @@ import com.blog.api.types.NotificationType;
 import com.blog.api.types.TableType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
@@ -22,20 +19,27 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationResponse {
-    String id;
+    Long id;
     @Enumerated(EnumType.STRING)
     NotificationType type;
     BasicUserResponse sender;
     BasicUserResponse receiver;
+    @JsonProperty("context_type")
     TableType contextType;
-    String contextId;
+    @JsonProperty("context_id")
+    Long contextId;
     Object context;
+    @JsonProperty("direct_object_type")
     TableType directObjectType;
-    String directObjectId;
+    @JsonProperty("direct_object_id")
+    Long directObjectId;
+    @JsonProperty("direct_object")
     Object directObject;
     @JsonProperty("is_readed")
     boolean isReaded;
 
+    @JsonProperty("created_at")
     Instant createdAt;
+    @JsonProperty("updated_at")
     Instant updatedAt;
 }

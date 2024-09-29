@@ -24,10 +24,9 @@ public class TopicServiceImp implements TopicService {
 
     @Override
     public Topic getByName(String name) {
-        Topic topic =  topicRepository.findById(name).orElseThrow(()
-                -> new AppException(ErrorCode.TOPIC_NOT_FOUND));
 
-        return topic;
+        return topicRepository.findById(name).orElseThrow(()
+                -> new AppException(ErrorCode.TOPIC_NOT_FOUND));
     }
 
     @Override

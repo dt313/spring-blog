@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseObject {
+    private Integer code;
     private HttpStatus status;
     private String message;
     private Object data;

@@ -1,5 +1,5 @@
 package com.blog.api.types;
 
 public enum  ReactionType {
-    LIKE,HEART, NULL;
+    LIKE,LOVE,CARE,ANGRY, WOW,HAHA,SAD, NULL
 }

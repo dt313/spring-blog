@@ -2,12 +2,12 @@ package com.blog.api.service.impl;
 
 import com.blog.api.dto.request.UserCreationRequest;
 import com.blog.api.dto.request.UserUpdateRequest;
+import com.blog.api.dto.response.UserResponse;
 import com.blog.api.entities.Role;
+import com.blog.api.entities.User;
 import com.blog.api.exception.AppException;
 import com.blog.api.exception.ErrorCode;
-import com.blog.api.dto.response.UserResponse;
 import com.blog.api.mapper.UserMapper;
-import com.blog.api.entities.User;
 import com.blog.api.repository.RoleRepository;
 import com.blog.api.repository.UserRepository;
 import com.blog.api.service.UserService;
@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -41,8 +40,8 @@ public class UserServiceImp implements UserService {
     public UserResponse getMyInformation() {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
-        System.out.println(context);
         User user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
         return userMapper.toUserResponse(user);
 
     }
@@ -55,9 +54,8 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserResponse getUserByUsername(String username) {
-        log.info("In method get user by Id");
-        Optional<User> foundedUser = userRepository.findByUsername(username);
 
+        Optional<User> foundedUser = userRepository.findByUsername(username);
         if (foundedUser.isPresent()) {
             return userMapper.toUserResponse(foundedUser.get());
         }else
@@ -88,7 +86,7 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public UserResponse updateUser(String id, UserUpdateRequest updateUser) {
+    public UserResponse updateUser(Long id, UserUpdateRequest updateUser) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userMapper.updateUser(user, updateUser);
         user.setPassword(passwordEncoder.encode(updateUser.getPassword()));
@@ -100,7 +98,7 @@ public class UserServiceImp implements UserService {
 
 //    @PreAuthorize("hasRole('CREATE_POST')")
     @Override
-    public boolean deleteUser(String id) {
+    public boolean deleteUser(Long id) {
         boolean isExists = userRepository.existsById(id);
         if(isExists) {
             try{
@@ -116,8 +114,8 @@ public class UserServiceImp implements UserService {
         }
     }
 
-    private String generateUsername (String email) {
-        String result = email.split("@")[0].toString().concat(UUID.randomUUID().toString().substring(0,5));
+    public String generateUsername (String email) {
+        String result = email.split("@")[0].concat(UUID.randomUUID().toString().substring(0,5));
         return result;
     }
 }

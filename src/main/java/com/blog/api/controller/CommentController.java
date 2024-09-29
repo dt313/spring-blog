@@ -25,49 +25,40 @@ public class CommentController {
     ResponseEntity<ResponseObject> getAllComment() {
         List<CommentResponse> result = commentService.getAllComment();
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Get all comment successfully", result));
     }
     @PostMapping("")
     ResponseEntity<ResponseObject> create(@RequestBody CommentCreationRequest request) {
         CommentResponse result = commentService.create(request);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Create comment successfully", result));
     }
 
     @GetMapping("/{type}/{commentableId}")
     ResponseEntity<ResponseObject> getCommentsByCommentableId(
             @PathVariable TableType type,
-            @PathVariable String commentableId ,
+            @PathVariable Long commentableId ,
             @RequestParam(required = false, defaultValue = "1") int pageNumber,
             @RequestParam(required = false, defaultValue = "10") int pageSize
             ) {
         List<CommentResponse> result = commentService.getByTypeAndCommentableId(type,commentableId, pageNumber,pageSize);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Get all comment by comment table id successfully", result));
     }
 
 
 
     @GetMapping("/{commentsById}")
-    ResponseEntity<ResponseObject> getCommentsById(@PathVariable String commentsById) {
+    ResponseEntity<ResponseObject> getCommentsById(@PathVariable Long commentsById) {
         CommentResponse result = commentService.getById(commentsById);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Get comment successfully", result));
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<ResponseObject> deleteById(@PathVariable String id) {
+    ResponseEntity<ResponseObject> deleteById(@PathVariable Long id) {
         commentService.delete(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", null));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Delete comment successfully", null));
     }
 
-    @GetMapping("/length/{type}/{commentsById}")
-    ResponseEntity<ResponseObject> getCountOfCommentByCommentType(
-            @PathVariable TableType type,
-            @PathVariable String commentsById
-    ) {
-        Integer result = commentService.getLengthByCommentTypeAndCommentableId(type,commentsById);
-
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
-    }
 }

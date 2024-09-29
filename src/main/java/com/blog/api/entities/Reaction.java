@@ -6,24 +6,25 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "reactions")
 @EntityListeners(AuditingEntityListener.class)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Reaction {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
-    String reactionTableId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reaction_seq")
+    @SequenceGenerator(name = "reaction_seq", sequenceName = "reaction_seq", allocationSize = 1)
+    Long id;
+    Long reactionTableId;
     @Enumerated(EnumType.STRING)
     ReactionType type;
     @Enumerated(EnumType.STRING)

@@ -1,6 +1,5 @@
 package com.blog.api.dto.request;
 
-import com.blog.api.dto.response.BasicUserResponse;
 import com.blog.api.types.TableType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,9 +13,9 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookmarkRequest {
-    String bookmarkTableId;
+    Long bookmarkTableId;
     @Enumerated(EnumType.STRING)
     TableType bookmarkTableType;
     @ManyToOne
-    String bookmarkedUser;
+    Long bookmarkedUser;
 }

@@ -8,9 +8,9 @@ import java.util.List;
 
 @Service
 public interface RoleService {
-    public RoleResponse create(RoleRequest request);
+    RoleResponse create(RoleRequest request);
 
-    public List<RoleResponse> getAll();
-    public void delete(String name);
+    List<RoleResponse> getAll();
+    void delete(String name);
 
 }

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -30,47 +29,44 @@ public class UserController {
     public ResponseEntity<ResponseObject> getMyInformation() {
         UserResponse me = userService.getMyInformation();
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject(HttpStatus.OK, "success", me)
+                new ResponseObject(1000, HttpStatus.OK, "Get information successfully", me)
         );
     }
 
     @GetMapping("")
     private ResponseEntity<ResponseObject> getAllUser() {
         List<UserResponse> users = userService.getAllUsers();
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "Query all user successfully", users ));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Get all user successfully", users ));
     }
 
     @GetMapping("/{username}")
     private ResponseEntity<ResponseObject> getUserByUsername(@PathVariable String username) {
         UserResponse foundedUser = userService.getUserByUsername(username);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "Query user by id successfully", foundedUser));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Get user by id successfully", foundedUser));
     }
 
     @PostMapping("")
     private ResponseEntity<ResponseObject> createUser(@RequestBody @Valid UserCreationRequest request) {
-        System.out.println(request);
         UserResponse insertedUser = userService.createUser(request);
-        System.out.println(insertedUser);
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject(HttpStatus.OK, "insert succesfully", insertedUser)
+                new ResponseObject(1000, HttpStatus.OK, "Create user successfully", insertedUser)
         );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseObject> updateUser(@PathVariable String id, @RequestBody UserUpdateRequest request) {
+    public ResponseEntity<ResponseObject> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
         UserResponse updatedUser = userService.updateUser(id, request);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "update successfully", updatedUser));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Update user successfully", updatedUser));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseObject> deleteUserById(@PathVariable String id) {
+    public ResponseEntity<ResponseObject> deleteUserById(@PathVariable Long id) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("Username ", authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority -> {
             log.info(grantedAuthority.getAuthority());
         });
         boolean isExists = userService.deleteUser(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "delete user succesfully", ""));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Delete user successfully", ""));
     }
 
 

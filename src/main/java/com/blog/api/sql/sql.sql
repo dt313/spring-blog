@@ -28,6 +28,7 @@ WHERE owner = 'SYSTEM';
 
 
 
+
 drop table article_of_user cascade constraints ;
 drop table articles cascade constraints ;
 drop table comments cascade constraints ;
@@ -40,10 +41,12 @@ drop table  permission_of_role cascade constraints ;
 drop table  role_of_user cascade constraints;
 drop table  permissions cascade constraints ;
 drop table  roles cascade constraints ;
-drop table  topic_of_article cascade constraints ;
+drop table  topics_of_article cascade constraints ;
 drop table  topics cascade constraints ;
 drop table  users cascade constraints ;
 drop table  users_articles cascade constraints ;
 drop table  articles_comments cascade constraints ;
 drop table  reactions cascade constraints ;
 drop table  articles_reactions cascade constraints ;
+drop table  bookmarks cascade constraints ;
+drop table  images cascade constraints

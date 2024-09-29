@@ -7,7 +7,7 @@ import java.util.List;
 
 @Service
 public interface TopicService {
-    public List<Topic> getAll();
-    public Topic getByName(String name);
-    public void delete(String name);
+    List<Topic> getAll();
+    Topic getByName(String name);
+    void delete(String name);
 }

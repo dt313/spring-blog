@@ -8,7 +8,7 @@ import java.util.List;
 
 @Service
 public interface PermissionService {
-    public PermissionResponse create(PermissionRequest request);
-    public List<PermissionResponse> getAll();
-    public void delete(String name);
+    PermissionResponse create(PermissionRequest request);
+    List<PermissionResponse> getAll();
+    void delete(String name);
 }

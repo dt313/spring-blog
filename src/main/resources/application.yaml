@@ -1,7 +1,8 @@
 server:
   port: 8080
 
-
+client:
+  domain: "http://web-deb.com:3000"
 
 spring:
   web:

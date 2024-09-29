@@ -15,11 +15,11 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NotificationRequest {
     @Enumerated(EnumType.STRING)
-    String sender;
+    Long sender;
     NotificationType type;
-    String receiver;
+    Long receiver;
     TableType contextType;
-    String contextId;
+    Long contextId;
     TableType directObjectType;
-    String directObjectId;
+    Long directObjectId;
 }

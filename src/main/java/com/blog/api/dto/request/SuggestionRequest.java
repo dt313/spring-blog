@@ -10,6 +10,6 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SuggestionRequest {
-    String userId;
+    Long userId;
     Set<String> topics;
 }

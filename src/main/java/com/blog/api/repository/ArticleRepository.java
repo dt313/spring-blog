@@ -9,11 +9,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface ArticleRepository extends JpaRepository<Article, String> {
+public interface ArticleRepository extends JpaRepository<Article, Long> {
     boolean existsByTitle(String title);
+    Optional<Article> findBySlug(String slug);
     List<Article> findAllByAuthor(User author);
     @Query("SELECT e FROM Article e WHERE e.title LIKE %:word% OR e.metaTitle LIKE %:word% OR e.content LIKE %:word%"  )
     List<Article> findByTitleContaining(@Param("word")String title, PageRequest pageRequest);
@@ -27,5 +29,5 @@ public interface ArticleRepository extends JpaRepository<Article, String> {
 
     @Query("SELECT a FROM Article a JOIN a.topics t WHERE t.name IN :topics OR a.author.id = :author" )
     List<Article> findByTopicsOrAuthor(
-            @Param("topics") Set<String> topics , @Param("author") String userId, PageRequest pageRequest);
+            @Param("topics") Set<String> topics , @Param("author") Long userId, PageRequest pageRequest);
 }

@@ -8,11 +8,11 @@ import java.util.List;
 
 @Service
 public interface NotificationService {
-    public List<NotificationResponse> getAll(int pageSize,int pageNumber);
-    public List<NotificationResponse> getAllByUser (String id , int pageNumber, int pageSize);
+    List<NotificationResponse> getAll(int pageSize, int pageNumber);
+    List<NotificationResponse> getAllByUser(Long id, int pageNumber, int pageSize);
 
-    public NotificationResponse create(NotificationRequest notificationRequest);
-    public boolean read(String id);
-    public boolean readAll();
+    NotificationResponse create(NotificationRequest notificationRequest);
+    boolean read(Long id);
+    boolean readAll();
 
 }

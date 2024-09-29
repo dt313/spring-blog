@@ -1,24 +1,19 @@
 package com.blog.api.dto.response;
 
-import com.blog.api.entities.Comment;
+import com.blog.api.types.ReactionType;
 import com.blog.api.types.TableType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Transient;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.Array;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Formula;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -26,14 +21,20 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentResponse {
-    String id;
-    String commentableId;
+    Long id;
+    @JsonProperty("comment_table_id")
+    Long commentableId;
     BasicUserResponse publisher;
     @Enumerated(EnumType.STRING)
+    @JsonProperty("comment_type")
     TableType commentType;
     String content;
+    @JsonProperty("replies_count")
     Integer repliesCount;
+    @JsonProperty("reaction_count")
     Integer reactionCount;
+    @JsonProperty("reacted_type")
+    ReactionType reactedType;
     @JsonProperty("replies")
     @JsonInclude(JsonInclude.Include.ALWAYS)
     List<Object> replies = new ArrayList<>();
@@ -41,7 +42,10 @@ public class CommentResponse {
     boolean isReacted;
     @JsonProperty("is_approved")
     boolean isApproved;
+    Set<ReactionResponse> reactions = new HashSet<>();;
+    @JsonProperty("created_at")
     Instant createdAt;
+    @JsonProperty("updated_at")
     Instant updatedAt;
 
 }

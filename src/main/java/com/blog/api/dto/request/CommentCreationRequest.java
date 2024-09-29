@@ -10,8 +10,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentCreationRequest {
-    String commentableId;
-    String publisher;
+    Long commentableId;
+    Long publisher;
     TableType commentType;
     String content;
 }

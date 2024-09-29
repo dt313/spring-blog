@@ -24,41 +24,20 @@ public class ReactionController {
     @GetMapping("")
     ResponseEntity<ResponseObject> getAll() {
         List<ReactionResponse> result = reactionService.getAll();
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK,"Get all reactions successfully",result));
     }
 
     @PostMapping("/toggle")
     ResponseEntity<ResponseObject> toggle(@RequestBody ReactionRequest request) {
-        ReactionType isReacted = reactionService.toggleReaction(request);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",isReacted));
+        ReactionResponse response = reactionService.toggleReaction(request);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK,"Toggle reaction success",response));
     }
 
     @GetMapping("/{type}/{id}")
-    ResponseEntity<ResponseObject> getAllByReactionTableId(@PathVariable TableType type, @PathVariable String id) {
+    ResponseEntity<ResponseObject> getAllByReactionTableId(@PathVariable TableType type, @PathVariable Long id) {
         List<ReactionResponse> result = reactionService.getAllByReactionTableId(type,id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK,"Get all by reaction table id successfully",result));
     }
 
-    @GetMapping("/length")
-    ResponseEntity<ResponseObject> countOfReaction() {
-        Integer result = reactionService.countOfReaction();
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
-    }
-
-    @GetMapping("/length/{id}")
-    ResponseEntity<ResponseObject> countOfReactionByReactionTableId(@PathVariable String id) {
-        Integer result = reactionService.countOfReactionByReactionTableId(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
-    }
-
-    @GetMapping("/check")
-    ResponseEntity<ResponseObject> checkReaction(
-            @RequestParam(required = true ) TableType reactionTableType,
-            @RequestParam(required = true) String reactionTableId,
-            @RequestParam(required = true) String userId
-    ) {
-        ReactionType result = reactionService.checkReaction(reactionTableType,reactionTableId,userId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
-    }
 
 }

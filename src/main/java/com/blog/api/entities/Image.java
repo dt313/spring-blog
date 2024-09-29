@@ -3,7 +3,6 @@ package com.blog.api.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.Type;
 
 @Entity
 @Data

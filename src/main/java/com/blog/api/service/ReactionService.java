@@ -10,11 +10,11 @@ import java.util.List;
 
 @Service
 public interface ReactionService {
-    public ReactionResponse getById(String id);
-    public ReactionType toggleReaction(ReactionRequest request);
-    public List<ReactionResponse> getAllByReactionTableId(TableType type, String id);
-    public List<ReactionResponse> getAll();
-    public Integer countOfReactionByReactionTableId(String id);
-    public Integer countOfReaction();
-    public ReactionType checkReaction(TableType type , String reactionTableId, String userId);
+    ReactionResponse getById(Long id);
+    ReactionResponse toggleReaction(ReactionRequest request);
+    List<ReactionResponse> getAllByReactionTableId(TableType type, Long id);
+    List<ReactionResponse> getAll();
+    Integer countOfReactionByReactionTableId(Long id);
+    Integer countOfReaction();
+    ReactionType checkReaction(TableType type, Long reactionTableId, Long userId);
 }

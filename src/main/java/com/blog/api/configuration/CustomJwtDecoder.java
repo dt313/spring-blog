@@ -1,22 +1,17 @@
 package com.blog.api.configuration;
 
-import java.text.ParseException;
-import java.util.Objects;
-import javax.crypto.spec.SecretKeySpec;
-
-import com.blog.api.dto.request.IntrospectRequest;
-import com.blog.api.dto.response.IntrospectResponse;
-import com.blog.api.service.AuthenticationService;
+import com.blog.api.exception.AuthException;
+import com.blog.api.utils.TokenProvider;
 import com.nimbusds.jose.JOSEException;
-import netscape.javascript.JSException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Component;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.text.ParseException;
+import java.util.Objects;
 
 @Component
 public class CustomJwtDecoder implements JwtDecoder {
@@ -24,32 +19,30 @@ public class CustomJwtDecoder implements JwtDecoder {
     private String signerKey;
 
     @Autowired
-    private AuthenticationService authenticationService;
+    private TokenProvider tokenProvider;
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
 
     @Override
     public Jwt decode(String token) throws JwtException {
 
-        IntrospectResponse response = null;
         try {
-            response = authenticationService.introspect(
-                    IntrospectRequest.builder().token(token).build());
-            if(!response.isValid())
-                throw new JwtException("Token Invalid");
-        } catch (JOSEException|ParseException e) {
-            throw new JwtException(e.getMessage());
+            boolean isInValidToken = tokenProvider.isInValid(token);
+            if(isInValidToken) {
+                throw new AuthException("custom token invalid", new BadJwtException("Signed JWT rejected: Invalid signature"));
+            }
+        } catch (ParseException | JOSEException e) {
+            throw new AuthException("custom token invalid", new BadJwtException("Signed JWT rejected: Invalid signature"));
         }
 
-
-
+        // Khởi tạo NimbusJwtDecoder nếu chưa được khởi tạo
         if (Objects.isNull(nimbusJwtDecoder)) {
             SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
             nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
                     .macAlgorithm(MacAlgorithm.HS512)
                     .build();
         }
+            return nimbusJwtDecoder.decode(token);
 
-        return nimbusJwtDecoder.decode(token);
     }
 }

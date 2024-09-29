@@ -1,5 +1,7 @@
 package com.blog.api.configuration;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,17 +19,22 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
 @EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig  {
 
-public class SecurityConfig {
+    private final CustomOauth2UserService oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final CustomJwtDecoder customJwtDecoder;
 
     private final String[] GET_METHOD_PUBLIC_ENDPOINTS = {
             "/api/v1/articles/**",
+            "/api/v1/articles",
             "/api/v1/users/**",
             "/api/v1/topics",
             "/api/v1/reaction",
@@ -35,8 +42,9 @@ public class SecurityConfig {
             "/api/v1/bookmark/**",
             "/api/v1/bookmark",
             "/api/v1/comments/**",
-            "/api/v1/questions/**",
-            "/api/v1/questions",
+            "/api/v1/image/**",
+            "/static/**",
+            "/api/v1/static/image/**"
     };
 
     private final String[] POST_METHOD_PUBLIC_ENDPOINTS = {
@@ -47,7 +55,10 @@ public class SecurityConfig {
             "/api/v1/users",
             "/api/v1/articles/suggestion",
     };
-    CustomJwtDecoder customJwtDecoder;
+
+    @Value("${client.domain}")
+    private String clientDomain;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 
@@ -64,10 +75,18 @@ public class SecurityConfig {
                             .authenticated()
             );
 
-            httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
-                            jwtConfigurer.decoder(customJwtDecoder)
+            httpSecurity.oauth2Login(oauth2 -> oauth2.authorizationEndpoint(
+                    b -> b.baseUri("/oauth2/authorization/**"))
+                    .redirectionEndpoint(r -> r.baseUri("/oauth2/callback/**"))
+                    .userInfoEndpoint(c-> c.userService(oAuth2UserService))
+                    .successHandler(oAuth2SuccessHandler)
+                    .failureHandler(oAuth2FailureHandler));
+
+            httpSecurity.oauth2ResourceServer(
+                    oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
                                     .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                     .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+
 
             httpSecurity.csrf(AbstractHttpConfigurer::disable).cors(Customizer.withDefaults());
         return httpSecurity.build();
@@ -87,15 +106,16 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10);
     }
 
-
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedOrigins(List.of(clientDomain));
+        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }

@@ -1,18 +1,22 @@
 package com.blog.api.exception;
 
+import com.blog.api.dto.response.ErrorResponse;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @ControllerAdvice
 @Slf4j
@@ -24,6 +28,8 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         errorResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        // Log thông tin chi tiết về ngoại lệ để dễ dàng theo dõi
+        log.error("Unhandled exception: ", ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
@@ -45,9 +51,37 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ErrorCode.NO_RESOURCE.getStatusCode()).body(errorResponse);
     }
 
+    @ExceptionHandler(value = TransactionSystemException.class)
+    ResponseEntity<ErrorResponse> handleTransactionSystemException(TransactionSystemException ex) {
+        Throwable cause = ex.getRootCause(); // Lấy nguyên nhân gốc
+
+        if (cause instanceof ConstraintViolationException constraintViolationException) {
+            Set<ConstraintViolation<?>> violations = constraintViolationException.getConstraintViolations();
+
+            String errorMessage = "";
+            Map<String, String> errors = new HashMap<>();
+            for (ConstraintViolation<?> violation : violations) {
+                errorMessage = violation.getMessage(); // Lấy interpolatedMessage
+                break;
+            }
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.setCode(ErrorCode.VALIDATION_ERROR.getCode()); // Sử dụng mã lỗi phù hợp
+            errorResponse.setMessage(errorMessage);
+            errorResponse.setStatusCode(HttpStatus.BAD_REQUEST); // Bao gồm chi tiết các lỗi
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+
+        // Nếu không phải lỗi do ConstraintViolation, trả về lỗi chung
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setCode(ErrorCode.NO_RESOURCE.getCode());
+        errorResponse.setMessage(ErrorCode.NO_RESOURCE.getMessage());
+        return ResponseEntity.status(ErrorCode.NO_RESOURCE.getStatusCode()).body(errorResponse);
+    }
+
+
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ErrorResponse> handleAccessDeniedException( AccessDeniedException exception) {
-        System.out.println("Access denied");
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
         return ResponseEntity.status(errorCode.getStatusCode())

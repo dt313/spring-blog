@@ -12,12 +12,12 @@ public interface ArticleMapper {
     @Mapping(target = "topics", ignore = true)
     @Mapping(target = "author", ignore = true)
     Article toArticle(ArticleRequest request);
-    @Mapping(target = "author", ignore = true)
 
+    @Mapping(target = "author", ignore = true)
+    @Mapping(target = "reactions", ignore = true)
     ArticleResponse toArticleResponse(Article article);
     @Mapping(target = "author" , ignore = true)
     @Mapping(target = "topics" , ignore = true)
-
     void updateArticle(@MappingTarget Article article,  ArticleRequest request);
 
     }

@@ -8,11 +8,13 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Instant;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,8 +23,9 @@ import java.time.Instant;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_seq")
+    @SequenceGenerator(name = "notification_seq", sequenceName = "notification_seq", allocationSize = 1)
+    Long id;
     @Enumerated(EnumType.STRING)
     NotificationType type;
 
@@ -32,11 +35,13 @@ public class Notification {
     User receiver;
 
     TableType contextType;
-    String contextId;
+    Long contextId;
 
     TableType directObjectType;
-    String directObjectId;
+    Long directObjectId;
+
     @JsonProperty("is_readed")
+    @Value("false")
     boolean isReaded;
 
 

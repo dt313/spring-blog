@@ -3,7 +3,6 @@ package com.blog.api.controller;
 import com.blog.api.entities.Image;
 import com.blog.api.entities.ResponseObject;
 import com.blog.api.service.ImageService;
-import com.blog.api.service.impl.ImageServiceImp;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,15 +21,14 @@ import java.util.zip.DataFormatException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ImageController {
     ImageService imageService;
+    private final String imageDirectory = "resource/static/images"; // Đường dẫn đến thư mục chứa ảnh
+
 
     @PostMapping("/api/v1/upload-image")
-    @CrossOrigin
     ResponseEntity<ResponseObject> upload(@RequestBody MultipartFile file) throws IOException {
 
-        System.out.println("Upload");
-        System.out.println(file);
         var result = imageService.uploadImage(file);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"sucess", result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK,"success", result));
     }
 
     @GetMapping("/api/v1/image/{id}")
@@ -44,6 +42,8 @@ public class ImageController {
     @GetMapping("/api/v1/image")
     ResponseEntity<ResponseObject> getAll() throws IOException, DataFormatException {
         List<Image> imageData = imageService.getAll();
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", imageData));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "success", imageData));
     }
+
+
 }

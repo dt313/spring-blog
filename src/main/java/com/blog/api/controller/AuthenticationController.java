@@ -3,6 +3,7 @@ package com.blog.api.controller;
 import com.blog.api.dto.request.AuthenticatedRequest;
 import com.blog.api.dto.request.IntrospectRequest;
 import com.blog.api.dto.request.LogoutRequest;
+import com.blog.api.dto.request.RefreshRequest;
 import com.blog.api.dto.response.AuthenticationResponse;
 import com.blog.api.dto.response.IntrospectResponse;
 import com.blog.api.entities.ResponseObject;
@@ -13,10 +14,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -25,31 +29,32 @@ import java.util.Map;
 
 public class AuthenticationController {
     AuthenticationService authenticationService;
+    OAuth2AuthorizedClientService clientService;
 
     @PostMapping("/introspect")
-    ResponseEntity<ResponseObject> introspect(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
+    public ResponseEntity<ResponseObject> introspect(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
         IntrospectResponse result = authenticationService.introspect(request);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+        return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "introspect success", result));
     }
     @PostMapping("/login")
-    ResponseEntity<ResponseObject> login(@RequestBody AuthenticatedRequest request) {
+    public ResponseEntity<ResponseObject> login(@RequestBody AuthenticatedRequest request) {
         var result = authenticationService.authenticate(request);
-        return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "success", result));
+        return   ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "login success", result));
     }
 
     @PostMapping("/logout")
-    ResponseEntity<ResponseObject> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
+    public ResponseEntity<ResponseObject> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
         authenticationService.logout(request);
-        return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "logout success", ""));
+        return   ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "logout success", ""));
     }
 
 
-    @GetMapping("/refresh")
-    ResponseEntity<ResponseObject> refresh(@RequestHeader Map<String, String> headers) throws ParseException, JOSEException {
-        String authorization =  headers.get("authorization");
-        AuthenticationResponse refreshToken = authenticationService.refresh(authorization);
-        return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK, "refresh success", refreshToken));
+    @PostMapping("/refresh")
+    public ResponseEntity<ResponseObject> refresh(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+        AuthenticationResponse refreshToken = authenticationService.refresh(request);
+        return   ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "refresh success", refreshToken));
     }
+
 
 
 

@@ -36,8 +36,6 @@ public class RoleServiceImp implements RoleService {
         }
 
         var permissions = permissionRepository.findAllById(request.getPermissions());
-        log.info("Permissions : "+ permissions);
-
         Role role = roleMapper.toRole(request);
         role.setPermissions(new HashSet<>(permissions));
 

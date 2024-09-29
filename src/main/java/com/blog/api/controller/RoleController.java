@@ -25,19 +25,19 @@ public class RoleController {
     @PostMapping("")
     ResponseEntity<ResponseObject> create(@RequestBody @Valid RoleRequest request) {
         RoleResponse result = roleService.create(request);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000, HttpStatus.OK,"Create role successfully",result));
     }
 
     @GetMapping("")
     ResponseEntity<ResponseObject> getAll() {
        List<RoleResponse> result = roleService.getAll();
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",result));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK,"Get all role successfully",result));
     }
 
     @DeleteMapping("/{role}")
     ResponseEntity<ResponseObject> delete(@PathVariable String role) {
         roleService.delete(role);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(HttpStatus.OK,"success",null));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK,"Delete role successfully",null));
     }
 
 

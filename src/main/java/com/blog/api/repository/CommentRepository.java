@@ -9,7 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CommentRepository extends JpaRepository<Comment, String> {
-    List<Comment> findAllByCommentTypeAndCommentableId(TableType type, String id, Pageable pageable);
-    List<Comment> findAllByCommentTypeAndCommentableId(TableType type, String id);
+public interface CommentRepository extends JpaRepository<Comment, Long> {
+    List<Comment> findAllByCommentTypeAndCommentableId(TableType type, Long id, Pageable pageable);
+    List<Comment> findAllByCommentTypeAndCommentableId(TableType type, Long id);
+    Integer countByCommentTypeAndCommentableId(TableType type, Long id);
 }

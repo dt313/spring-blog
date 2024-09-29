@@ -8,54 +8,53 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 @ToString
 public enum ErrorCode {
-    NO_RESOURCE(9998, "Resource not found", HttpStatus.NOT_FOUND),
+    //
     UNCATEGORIZED_EXCEPTION(9999,"Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    UNAUTHORIZED(9997,"Permission denied", HttpStatus.FORBIDDEN),
-    UNAUTHENTICATED(9996,"Unauthenticated", HttpStatus.UNAUTHORIZED),
-    WRONG_PASSWORKD(9993,"Password is not true", HttpStatus.UNAUTHORIZED),
-    INVALID_KEY(9995, "Validation Invalid", HttpStatus.BAD_REQUEST),
-    NO_SUCH_METHOD(9994, "request format is unacceptable", HttpStatus.NOT_ACCEPTABLE),
+    NO_RESOURCE(9998, "Resource not found", HttpStatus.NOT_FOUND),
+    BOOKMARK_SELF_ARTICLE(9997, "Cannot bookmark self article", HttpStatus.BAD_REQUEST),
+    REACTION_NO_TYPE_TABLE(9996, "Comment type of table is not found", HttpStatus.NOT_FOUND),
 
-    // User
-    USER_NOT_FOUND(1001, "Username is not signed", HttpStatus.NOT_FOUND),
-    USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    PASSWORD_INVALID(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    USER_EXISTS(1002, "User exists", HttpStatus.CONFLICT),
-    USER_CONFLICT(1005, "Token and user conflict", HttpStatus.CONFLICT),
-    // Validation
+    // Auth [100x]
+    UNAUTHENTICATED(1001,"Unauthenticated", HttpStatus.UNAUTHORIZED),
+    WRONG_PASSWORD(1002,"Password is not true", HttpStatus.BAD_REQUEST),
+    INVALID_KEY(1003, "Validation Invalid", HttpStatus.BAD_REQUEST),
+    ILLEGAL_REGISTRATION_ID(1004, "illegal registration id", HttpStatus.NOT_ACCEPTABLE),
+    TOKEN_INVALID(1005,"token invalid", HttpStatus.UNAUTHORIZED),
+    TOKEN_EXPIRED(1006,"token expired", HttpStatus.UNAUTHORIZED),
+    UNAUTHORIZED(1007,"Permission denied", HttpStatus.FORBIDDEN),
+
+    // Invalid
+    USERNAME_INVALID(2001, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
+    PASSWORD_INVALID(2001, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
     DOB_INVALID(2001, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
 
-    // Permission
-    PERMISSION_NOT_FOUND(3001, "Permission not found", HttpStatus.NOT_FOUND),
-    PERMISSION_EXIST(3002, "Permission exist", HttpStatus.BAD_REQUEST),
-    // Role
-    ROLE_NOT_FOUND(4001, "Role not found", HttpStatus.NOT_FOUND),
-    ROLE_EXIST(4002, "Role exist", HttpStatus.CONFLICT),
+    // NOT FOUND
+    USER_NOT_FOUND(4004, "Username is not signed", HttpStatus.NOT_FOUND),
+    PERMISSION_NOT_FOUND(4004, "Permission not found", HttpStatus.NOT_FOUND),
+    ROLE_NOT_FOUND(4004, "Role not found", HttpStatus.NOT_FOUND),
+    TOPIC_NOT_FOUND(4004, "Topic not found", HttpStatus.NOT_FOUND),
+    COMMENT_NOT_FOUND(4004, "Comment not found", HttpStatus.NOT_FOUND),
+    REACTION_NOT_FOUND(4004, "Reaction not found", HttpStatus.NOT_FOUND),
+    ARTICLE_NOT_FOUND(4004, "Article not found", HttpStatus.NOT_FOUND),
+    NOTIFICATION_NOT_FOUND(4004, "Notification is not found", HttpStatus.NOT_FOUND),
+    IMAGE_NOT_FOUND(4004, "Notification is not found", HttpStatus.NOT_FOUND),
 
-    // Topic
-    TOPIC_NOT_FOUND(4001, "Role not found", HttpStatus.NOT_FOUND),
-    TOPIC_EXIST(4002, "Role exist", HttpStatus.CONFLICT),
+    // Exists - conflict
+    USER_EXISTS(3003, "User exists", HttpStatus.CONFLICT),
+    PERMISSION_EXIST(3003, "Permission exists", HttpStatus.CONFLICT),
+    ROLE_EXIST(3003, "Role exists", HttpStatus.CONFLICT),
+    TOPIC_EXIST(3003, "Role exists", HttpStatus.CONFLICT),
+    USER_CONFLICT(3003, "User conflict", HttpStatus.CONFLICT),
+    ARTICLE_EXISTS(3003, "Article exists", HttpStatus.CONFLICT),
+
+    // Validation
+    VALIDATION_ERROR(8888, "Validation Error", HttpStatus.BAD_REQUEST)
 
 
-    // Comment
-    COMMENT_NOT_FOUND(4001, "Comment not found", HttpStatus.NOT_FOUND),
-    COMMENT_EXIST(4002, "Comment exist", HttpStatus.CONFLICT),
 
-    // Reaction
-    // Comment
-    REACTION_NOT_FOUND(4001, "Reaction not found", HttpStatus.NOT_FOUND),
-    REACTION_EXIST(4002, "Reaction exist", HttpStatus.CONFLICT),
 
-    // User
-    ARTICLE_NOT_FOUND(5001, "Article not found", HttpStatus.NOT_FOUND),
-    ARTICLE_EXISTS(5002, "Article exists", HttpStatus.CONFLICT),
-    BOOKMARK_SELF_ARTICLE(5002, "Cannot bookmark self article", HttpStatus.BAD_REQUEST),
 
-    NO_TYPE_TABLE(1234, "Type of table is not found", HttpStatus.NOT_FOUND),
 
-    QUESTION_NOT_FOUND(1234, "Question is not found", HttpStatus.NOT_FOUND),
-
-    NOTIFICATION_NOT_FOUND(1234, "Notification is not found", HttpStatus.NOT_FOUND)
 
     ;
 
@@ -69,7 +68,7 @@ public enum ErrorCode {
         this.statusCode = statusCode;
     }
     int code;
-    private String message;
-    private HttpStatusCode statusCode;
+    private final String message;
+    private final HttpStatusCode statusCode;
 
 }
