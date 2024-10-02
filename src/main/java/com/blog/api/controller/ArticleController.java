@@ -89,6 +89,13 @@ public class ArticleController {
         ArticleResponse article = articleService.getById(id);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Query article by id successfully" , article));
     }
+
+    @PostMapping("/publish/{id}")
+    public ResponseEntity<ResponseObject> publish(@PathVariable Long id) {
+        ArticleResponse response = articleService.publish(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Publish article successfully" , response));
+
+    }
     
 
     @GetMapping("/slug/{slug}")
@@ -96,6 +103,13 @@ public class ArticleController {
         ArticleResponse article = articleService.getBySlug(slug);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Query article by slug successfully" , article));
     }
+
+    @GetMapping("/edit/slug/{slug}")
+    private ResponseEntity<ResponseObject> getBySlugWithAuth(@PathVariable String slug) {
+        ArticleResponse article = articleService.getBySlugWithAuth(slug);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Query article by slug successfully" , article));
+    }
+
 
 
     @PostMapping("")
@@ -119,5 +133,6 @@ public class ArticleController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Delete article successfully" , true));
 
     }
+
 
 }

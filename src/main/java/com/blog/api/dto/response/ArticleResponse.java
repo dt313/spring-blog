@@ -45,7 +45,10 @@ public class ArticleResponse {
 
     @JsonProperty("reactions")
     Set<ReactionResponse> reactions;
-
+    @JsonProperty("is_published")
+    boolean isPublished;
+    @JsonProperty("publish_at")
+    Instant publishAt;
     @JsonProperty("created_at")
     Instant createdAt;
     @JsonProperty("updated_at")

@@ -1,6 +1,7 @@
 package com.blog.api.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -8,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Instant;
 import java.util.List;
@@ -72,6 +74,9 @@ public class Article {
     @Transient
     boolean isReacted;
 
+    boolean isPublished;
+
+    Instant publishAt;
     @Column(updatable = false)
     @CreationTimestamp
     Instant createdAt;

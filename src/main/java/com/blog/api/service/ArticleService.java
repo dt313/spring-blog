@@ -17,7 +17,10 @@ public interface ArticleService {
     List<ArticleResponse> getAllByTopic(String name, int pageNumber, int pageSize);
     ArticleResponse getById(Long id);
     ArticleResponse getBySlug(String slug);
+    ArticleResponse getBySlugWithAuth(String slug);
+
     ArticleResponse create(ArticleRequest insertArticle);
+    ArticleResponse publish(Long id);
     ArticleResponse update(String slug, ArticleRequest updateArticle);
     void delete(Long id);
     Integer lengthOfArticleBySearchValue(String searchValue);

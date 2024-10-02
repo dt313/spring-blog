@@ -11,6 +11,7 @@ import org.mapstruct.MappingTarget;
 public interface ArticleMapper {
     @Mapping(target = "topics", ignore = true)
     @Mapping(target = "author", ignore = true)
+    @Mapping(target = "publishAt", ignore = true)
     Article toArticle(ArticleRequest request);
 
     @Mapping(target = "author", ignore = true)

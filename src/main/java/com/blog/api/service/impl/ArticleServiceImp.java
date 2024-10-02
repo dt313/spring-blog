@@ -26,14 +26,14 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.text.Normalizer;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -58,13 +58,11 @@ public class ArticleServiceImp implements ArticleService {
 
         Sort sort = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(pageNumber -1, pageSize, sort);
-        List<ArticleResponse> articles = articleRepository.findByTitleContaining(searchValue,pageRequest).stream().map((article) -> {
+        List<ArticleResponse> articles = articleRepository.findByTitleContainingAndIsPublished(searchValue,true,pageRequest).stream().map((article) -> {
            ArticleResponse temp = articleMapper.toArticleResponse(article);
             temp.setBookmarked(tableUtils.checkIsBookmarked(temp.getId(), user ));
             temp.setReacted(tableUtils.checkIsReacted(temp.getId(), user ));
            temp.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
-
-
            return temp;
         }).toList();
         return articles;
@@ -81,7 +79,7 @@ public class ArticleServiceImp implements ArticleService {
         Sort sort = Sort.by("reactionCount", "commentCount").descending();
 
         PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize, sort);
-        List<ArticleResponse> articles = articleRepository.findByTitleContaining(searchValue, pageRequest).stream().map((article) -> {
+        List<ArticleResponse> articles = articleRepository.findByTitleContainingAndIsPublished(searchValue, true, pageRequest).stream().map((article) -> {
             ArticleResponse temp = articleMapper.toArticleResponse(article);
             temp.setBookmarked(tableUtils.checkIsBookmarked(temp.getId(), user));
             temp.setReacted(tableUtils.checkIsReacted(temp.getId(), user));
@@ -114,6 +112,7 @@ public class ArticleServiceImp implements ArticleService {
 
     }
 
+    // without permission
     @Override
     public ArticleResponse getById(Long id) {
 
@@ -138,6 +137,7 @@ public class ArticleServiceImp implements ArticleService {
         return response;
     }
 
+    // without permission
     @Override
     public ArticleResponse getBySlug(String slug) {
 
@@ -145,6 +145,43 @@ public class ArticleServiceImp implements ArticleService {
         String username = context.getAuthentication().getName();
 
         User user = userRepository.findByUsername(username).orElse(null);
+        Article article = articleRepository.findBySlugAndIsPublished(slug, true).orElseThrow(
+                () -> new AppException(ErrorCode.ARTICLE_NOT_FOUND));
+
+
+        article.setBookmarked(tableUtils.checkIsBookmarked(article.getId(), user));
+        article.setReacted(tableUtils.checkIsReacted(article.getId(), user));
+        ArticleResponse response = articleMapper.toArticleResponse(article);
+        response.setAuthor(userMapper.toBasicUserResponse(article.getAuthor()));
+
+        // reacted type of user
+        Reaction reaction = reactionRepository.findByReactionTableIdAndReactedUser(article.getId(), user);
+        if(Objects.nonNull(reaction)) {
+            response.setReactedType(reaction.getType());
+        }else {
+            response.setReactedType(ReactionType.NULL);
+        }
+
+        // reacted users
+        List<ReactionResponse> reactionsResponse = article.getReactions().stream().map((r) -> {
+            ReactionResponse reactionResponse = reactionMapper.toReactionResponse(r);
+            reactionResponse.setReactedUser(userMapper.toBasicUserResponse(r.getReactedUser()));
+            return reactionResponse;
+        }).toList();
+
+        response.setReactions(new HashSet<>(reactionsResponse));
+
+        return response;
+    }
+
+    @Override
+    public ArticleResponse getBySlugWithAuth(String slug) {
+
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+
+        User user = userRepository.findByUsername(username).orElseThrow(() ->  new AppException(ErrorCode.UNAUTHORIZED));
+
         Article article = articleRepository.findBySlug(slug).orElseThrow(
                 () -> new AppException(ErrorCode.ARTICLE_NOT_FOUND));
 
@@ -207,6 +244,8 @@ public class ArticleServiceImp implements ArticleService {
     @Override
     public ArticleResponse create(ArticleRequest request) {
 
+        System.out.println(request);
+
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
 
@@ -222,11 +261,44 @@ public class ArticleServiceImp implements ArticleService {
         // Topic
         Set<Topic> topics = getListTopics(request.getTopics());
         article.setTopics(topics);
+
+        LocalDateTime localDateTime = LocalDateTime.parse(request.getPublishAt(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        // Đặt múi giờ KST
+        ZonedDateTime kstDateTime = localDateTime.atZone(ZoneId.of("Asia/Seoul"));
+
+        // Chuyển đổi thời gian KST sang UTC
+        ZonedDateTime utcDateTime = kstDateTime.withZoneSameInstant(ZoneId.of("UTC"));
+
+        article.setPublishAt(utcDateTime.toInstant());
+
+        if (article.getPublishAt().isAfter(Instant.now())) {
+            article.setPublished(false);
+        }else {
+            article.setPublished(true);
+        }
         // Response
         ArticleResponse articleResponse = articleMapper.toArticleResponse(articleRepository.save(article));
         articleResponse.setAuthor(userMapper.toBasicUserResponse(author));
 
         return articleResponse;
+    }
+
+    @Scheduled(fixedRate = 60000) // chạy mỗi 60 giây
+    public void schedulePostArticle() {
+        System.out.println("log schedule");
+
+        List<Article> articles = articleRepository.findByIsPublished(false);
+        System.out.println(articles);
+
+        if(Objects.nonNull(articles)) {
+            articles.stream().forEach((article) -> {
+                if(article.getPublishAt().isBefore(Instant.now())) {
+                    article.setPublished(true);
+                    articleRepository.save(article);
+                }
+            });
+        }else return;
     }
 
     @Override
@@ -259,9 +331,15 @@ public class ArticleServiceImp implements ArticleService {
         articleResponse.setAuthor(userMapper.toBasicUserResponse(author));
 
         return articleResponse;
+    }
 
-
-
+    @Override
+    public ArticleResponse publish(Long id) {
+        Article article = articleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ARTICLE_NOT_FOUND));
+        article.setPublished(true);
+        article.setPublishAt(Instant.now());
+        articleRepository.save(article);
+        return articleMapper.toArticleResponse(article);
     }
 
     @Override
@@ -279,7 +357,7 @@ public class ArticleServiceImp implements ArticleService {
 
     @Override
     public Integer lengthOfArticleBySearchValue(String searchValue) {
-        List<Article> articles = articleRepository.findByTitleContaining(searchValue);
+        List<Article> articles = articleRepository.findByTitleContainingAndIsPublished(searchValue, true);
         return articles.size();
     }
 

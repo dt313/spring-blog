@@ -3,6 +3,7 @@ package com.blog.api.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
 import java.util.Set;
 
 @Data
@@ -19,4 +20,5 @@ public class ArticleRequest {
     String thumbnail;
     String description;
     Set<String> topics;
+    String publishAt;
 }
