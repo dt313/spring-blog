@@ -20,6 +20,7 @@ public class BasicUserResponse {
     String email;
     String username;
     String avatar;
+    String name;
     @JsonProperty("created_at")
     Instant createdAt;
     @JsonProperty("updated_at")

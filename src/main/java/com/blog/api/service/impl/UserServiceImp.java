@@ -2,6 +2,7 @@ package com.blog.api.service.impl;
 
 import com.blog.api.dto.request.UserCreationRequest;
 import com.blog.api.dto.request.UserUpdateRequest;
+import com.blog.api.dto.response.AuthenticationResponse;
 import com.blog.api.dto.response.UserResponse;
 import com.blog.api.entities.Role;
 import com.blog.api.entities.User;
@@ -11,6 +12,7 @@ import com.blog.api.mapper.UserMapper;
 import com.blog.api.repository.RoleRepository;
 import com.blog.api.repository.UserRepository;
 import com.blog.api.service.UserService;
+import com.blog.api.utils.TokenProvider;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,6 +37,7 @@ public class UserServiceImp implements UserService {
      UserMapper userMapper;
      PasswordEncoder passwordEncoder;
      RoleRepository roleRepository;
+     TokenProvider tokenProvider;
 
     @Override
     public UserResponse getMyInformation() {
@@ -86,14 +89,20 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public UserResponse updateUser(Long id, UserUpdateRequest updateUser) {
+    public AuthenticationResponse updateUser(Long id, UserUpdateRequest updateUser) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userMapper.updateUser(user, updateUser);
-        user.setPassword(passwordEncoder.encode(updateUser.getPassword()));
 
-        var roles = roleRepository.findAllById(updateUser.getRoles());
-        user.setRoles(new HashSet<>(roles));
-        return userMapper.toUserResponse(userRepository.save(user));
+
+//        user.setPassword(passwordEncoder.encode(updateUser.getPassword()));
+
+//        var roles = roleRepository.findAllById(updateUser.getRoles());
+//        user.setRoles(new HashSet<>(roles));
+
+        var token = tokenProvider.generateToken(user);
+
+        return AuthenticationResponse.builder().authenticated(true).token(token).user(userMapper.toUserResponse(userRepository.save(user))).build();
+
     }
 
 //    @PreAuthorize("hasRole('CREATE_POST')")

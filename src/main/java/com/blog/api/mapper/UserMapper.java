@@ -5,9 +5,7 @@ import com.blog.api.dto.request.UserUpdateRequest;
 import com.blog.api.dto.response.BasicUserResponse;
 import com.blog.api.dto.response.UserResponse;
 import com.blog.api.entities.User;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -18,6 +16,7 @@ public interface UserMapper {
 
     UserResponse toUserResponse(User user);
     BasicUserResponse toBasicUserResponse(User user);
-    @Mapping(target = "roles", ignore = true)
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
 }

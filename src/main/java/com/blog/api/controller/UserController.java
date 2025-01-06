@@ -2,6 +2,7 @@ package com.blog.api.controller;
 
 import com.blog.api.dto.request.UserCreationRequest;
 import com.blog.api.dto.request.UserUpdateRequest;
+import com.blog.api.dto.response.AuthenticationResponse;
 import com.blog.api.dto.response.UserResponse;
 import com.blog.api.entities.ResponseObject;
 import com.blog.api.service.UserService;
@@ -55,7 +56,9 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseObject> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
-        UserResponse updatedUser = userService.updateUser(id, request);
+
+        System.out.println(request);
+        AuthenticationResponse updatedUser = userService.updateUser(id, request);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Update user successfully", updatedUser));
     }
 
@@ -65,7 +68,7 @@ public class UserController {
         authentication.getAuthorities().forEach(grantedAuthority -> {
             log.info(grantedAuthority.getAuthority());
         });
-        boolean isExists = userService.deleteUser(id);
+        userService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Delete user successfully", ""));
     }
 

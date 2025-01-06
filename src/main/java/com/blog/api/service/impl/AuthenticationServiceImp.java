@@ -62,7 +62,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
         }
 
         String token = tokenProvider.generateToken(user);
-        return AuthenticationResponse.builder().authenticated(isAuthenticated).token(token).user(userMapper.toBasicUserResponse(user)).build();
+        return AuthenticationResponse.builder().authenticated(isAuthenticated).token(token).user(userMapper.toUserResponse(user)).build();
     }
 
     @Override
@@ -105,7 +105,8 @@ public class AuthenticationServiceImp implements AuthenticationService {
         var user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         var refreshToken = tokenProvider.generateToken(user);
-        return AuthenticationResponse.builder().token(refreshToken).authenticated(true).user(userMapper.toBasicUserResponse(user)).build();
+
+        return AuthenticationResponse.builder().token(refreshToken).authenticated(true).user(userMapper.toUserResponse(user)).build();
     }
 
 

@@ -244,8 +244,6 @@ public class ArticleServiceImp implements ArticleService {
     @Override
     public ArticleResponse create(ArticleRequest request) {
 
-        System.out.println(request);
-
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
 
@@ -263,7 +261,6 @@ public class ArticleServiceImp implements ArticleService {
         article.setTopics(topics);
 
         LocalDateTime localDateTime = LocalDateTime.parse(request.getPublishAt(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
         // Đặt múi giờ KST
         ZonedDateTime kstDateTime = localDateTime.atZone(ZoneId.of("Asia/Seoul"));
 
@@ -316,6 +313,7 @@ public class ArticleServiceImp implements ArticleService {
         article.setBookmarked(tableUtils.checkIsBookmarked(article.getId(), author ));
         article.setReacted(tableUtils.checkIsReacted(article.getId(), author ));
         article.setSlug(generateSlug(updateArticle.getTitle()));
+
         articleMapper.updateArticle(article, updateArticle);
 
        // Compare author

@@ -19,6 +19,7 @@ public interface ArticleMapper {
     ArticleResponse toArticleResponse(Article article);
     @Mapping(target = "author" , ignore = true)
     @Mapping(target = "topics" , ignore = true)
+    @Mapping(target = "publishAt", ignore = true)
     void updateArticle(@MappingTarget Article article,  ArticleRequest request);
 
     }
