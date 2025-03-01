@@ -49,7 +49,6 @@ public class ReactionServiceImp implements ReactionService {
 
     @Override
     public ReactionResponse toggleReaction(ReactionRequest request) {
-        System.out.println(request);
         checkReactionTable(request.getReactionTableType(), request.getReactionTableId());
         User reactedUser = userRepository.findById(request.getReactedUser()).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_FOUND));

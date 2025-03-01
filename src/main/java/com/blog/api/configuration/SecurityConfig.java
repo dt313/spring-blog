@@ -44,7 +44,8 @@ public class SecurityConfig  {
             "/api/v1/comments/**",
             "/api/v1/image/**",
             "/static/**",
-            "/api/v1/static/image/**"
+            "/api/v1/static/image/**",
+            "/api/v1/mail/**"
     };
 
     private final String[] POST_METHOD_PUBLIC_ENDPOINTS = {
@@ -56,6 +57,10 @@ public class SecurityConfig  {
             "/api/v1/articles/suggestion",
     };
 
+    private final String[] PUT_METHOD_PUBLIC_ENDPOINTS = {
+            "/api/v1/users/reset-password"
+    };
+
     @Value("${client.domain}")
     private String clientDomain;
 
@@ -65,6 +70,7 @@ public class SecurityConfig  {
             httpSecurity.authorizeHttpRequests(request ->
                     request.requestMatchers(HttpMethod.POST, POST_METHOD_PUBLIC_ENDPOINTS).permitAll()
                             .requestMatchers(HttpMethod.GET, GET_METHOD_PUBLIC_ENDPOINTS).permitAll()
+                            .requestMatchers(HttpMethod.PUT, PUT_METHOD_PUBLIC_ENDPOINTS).permitAll()
                             .requestMatchers("/api/v1/notification").permitAll()
                             .requestMatchers(HttpMethod.GET,"/api/v1/notifications").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/v1/users/me").authenticated()

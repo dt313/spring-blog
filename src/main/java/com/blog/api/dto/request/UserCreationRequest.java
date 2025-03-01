@@ -19,8 +19,10 @@ public class UserCreationRequest {
     @Size(min = 6, message = "USERNAME_INVALID")
     String username;
 
-    @Size(min = 6, message = "PASSWORD_INVALID")
+    @Size(min = 8, message = "PASSWORD_INVALID")
     String password;
+
+    String otp;
 
     @DobConstraint(min=5,message = "DOB_INVALID")
     LocalDate dob;

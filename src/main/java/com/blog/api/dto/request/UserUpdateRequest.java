@@ -17,6 +17,12 @@ public class UserUpdateRequest {
     String email;
     String avatar;
     String name;
+    String bio;
+    String web_link;
+    String fb_link;
+    String gh_link;
+    String lk_link;
+    String ig_link;
     String password;
     String username;
     LocalDate dob;

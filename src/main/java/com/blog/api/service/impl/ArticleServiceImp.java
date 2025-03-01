@@ -88,6 +88,7 @@ public class ArticleServiceImp implements ArticleService {
             return temp;
         }).toList();
 
+
         return articles;
     }
 
@@ -156,6 +157,8 @@ public class ArticleServiceImp implements ArticleService {
 
         // reacted type of user
         Reaction reaction = reactionRepository.findByReactionTableIdAndReactedUser(article.getId(), user);
+
+
         if(Objects.nonNull(reaction)) {
             response.setReactedType(reaction.getType());
         }else {
@@ -283,11 +286,7 @@ public class ArticleServiceImp implements ArticleService {
 
     @Scheduled(fixedRate = 60000) // chạy mỗi 60 giây
     public void schedulePostArticle() {
-        System.out.println("log schedule");
-
         List<Article> articles = articleRepository.findByIsPublished(false);
-        System.out.println(articles);
-
         if(Objects.nonNull(articles)) {
             articles.stream().forEach((article) -> {
                 if(article.getPublishAt().isBefore(Instant.now())) {

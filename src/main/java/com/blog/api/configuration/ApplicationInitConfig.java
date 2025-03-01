@@ -10,9 +10,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
@@ -26,15 +29,14 @@ public class ApplicationInitConfig {
 
     PasswordEncoder passwordEncoder;
 
-        @Bean
-        ApplicationRunner applicationRunner(UserRepository userRepository,
+    RedisTemplate<String, String> redisTemplate;
+    @Bean
+    ApplicationRunner applicationRunner(UserRepository userRepository,
                                             PermissionRepository permissionRepository,
                                             RoleRepository roleRepository) {
-            return args -> {
-
+        return args -> {
 
                 if(userRepository.findByUsername("admin").isEmpty()) {
-
                     Permission permission = new Permission("CREATE" , "create post");
                     Permission permission1 = new Permission("UPDATE" , "update post");
                     permissionRepository.save(permission);

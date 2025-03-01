@@ -1,11 +1,14 @@
 package com.blog.api.controller;
 
+import com.blog.api.dto.request.ResetPasswordRequest;
 import com.blog.api.dto.request.UserCreationRequest;
 import com.blog.api.dto.request.UserUpdateRequest;
 import com.blog.api.dto.response.AuthenticationResponse;
 import com.blog.api.dto.response.UserResponse;
 import com.blog.api.entities.ResponseObject;
 import com.blog.api.service.UserService;
+import com.nimbusds.jose.JOSEException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -55,10 +60,23 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseObject> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
+    public ResponseEntity<ResponseObject> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request, HttpServletRequest httpServletRequest) throws ParseException, JOSEException {
+        String bearerToken = httpServletRequest.getHeader("Authorization");
+        String token = "";
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            token = bearerToken.substring(7); // Cắt bỏ "Bearer " để lấy token thực sự
 
-        System.out.println(request);
-        AuthenticationResponse updatedUser = userService.updateUser(id, request);
+        }
+        AuthenticationResponse updatedUser = userService.updateUser(id, request, token);
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Update user successfully", updatedUser));
+    }
+
+    @PutMapping("/upload-avatar/{id}")
+    public ResponseEntity<ResponseObject> uploadAvatar(@PathVariable Long id, @RequestBody MultipartFile file) {
+
+        AuthenticationResponse updatedUser = userService.uploadAvatar(id, file);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Update user successfully", updatedUser));
     }
 
@@ -72,6 +90,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Delete user successfully", ""));
     }
 
+    @PutMapping("/reset-password")
+    public ResponseEntity<ResponseObject> resetPassword(@RequestParam String token, @RequestBody ResetPasswordRequest password ) throws ParseException, JOSEException {
+        userService.resetPassword(token, password);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(1000,HttpStatus.OK, "Reset password successfully", null));
+    }
 
 
 }

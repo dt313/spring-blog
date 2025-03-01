@@ -49,10 +49,14 @@ public class User {
 
 //    private String gender = "";
     private String avatar = "";
-//    @Column
-//    private String introduction = "";
-//    @Column
-//    private String linkBio = "";
+
+    private String bio = "";
+    private String web_link = "";
+    private String fb_link = "";
+    private String gh_link = "";
+    private String ig_link = "";
+    private String lk_link = "";
+
 //    @Column
 //    private boolean isAdmin;
 //    @Column

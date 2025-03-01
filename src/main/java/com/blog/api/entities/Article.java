@@ -55,6 +55,7 @@ public class Article {
             inverseJoinColumns = @JoinColumn(name = "topic_id")
     )
     Set<Topic> topics;
+    
     @OneToMany(mappedBy = "commentableId",cascade = CascadeType.REMOVE)
     List<Comment> comments;
 
@@ -64,13 +65,18 @@ public class Article {
     @OneToMany(mappedBy = "bookmarkTableId",cascade = CascadeType.REMOVE)
     List<Bookmark> bookmarks;
 
+    @OneToMany(mappedBy = "directObjectId", cascade = CascadeType.REMOVE)
+    List<Notification> notifications;
+
     @Formula("(SELECT COUNT(*) FROM reactions r WHERE r.reaction_table_id = id)")
     Integer reactionCount = 0;
 
     @Formula("(SELECT COUNT(*) FROM comments c WHERE c.commentable_id = id and c.comment_type = 'ARTICLE')")
     Integer commentCount = 0;
+
     @Transient
     boolean isBookmarked;
+
     @Transient
     boolean isReacted;
 

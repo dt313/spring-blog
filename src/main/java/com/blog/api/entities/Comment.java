@@ -1,6 +1,7 @@
 package com.blog.api.entities;
 
 import com.blog.api.types.TableType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,14 +49,24 @@ public class Comment {
     @Transient
     boolean isApproved = false;
 
-    @Transient
+
+    @OneToMany(mappedBy = "commentableId", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    List<Comment> replies = new ArrayList<>();
+
+
     @JsonProperty("replies")
-    List<Object> replies = new ArrayList<>();
+    public List<Comment> getReplies() {
+        return new ArrayList<>();
+    }
 
     @Column(updatable = false)
     @CreationTimestamp
     Instant createdAt;
     @UpdateTimestamp
     Instant updatedAt;
+
+    @OneToMany(mappedBy = "directObjectId", cascade = CascadeType.REMOVE)
+    List<Notification> notifications;
 
 }

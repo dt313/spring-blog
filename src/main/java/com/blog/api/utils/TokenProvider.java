@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -25,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Data
@@ -40,16 +42,27 @@ public class TokenProvider {
     protected String SIGNED_KEY;
 
     @NonFinal
+    @Value("${jwt.reset-password-key}")
+    protected String RESET_PASSWORD_KEY;
+
+    @NonFinal
     @Value("${jwt.valid-duration}")
     protected long VALID_DURATION;
+
+    @NonFinal
+    @Value("${jwt.reset-password-duration}")
+    protected long RESET_PASSWORD_DURATION;
 
     @NonFinal
     @Value("${jwt.refreshable-duration}")
     protected long REFRESHABLE_DURATION;
 
 
+    private final RedisTemplate<String, String> redisTemplate;
+
+
+
     public String generateToken(User user) {
-        System.out.println(SIGNED_KEY);
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
@@ -119,5 +132,63 @@ public class TokenProvider {
             });
         }
         return stringJoiner.toString();
+    }
+
+
+    public String generateResetPasswordToken (String email) {
+
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(email)
+                .issuer("web-dev-reset-password")
+                .issueTime(new Date())
+                .expirationTime(new Date(Instant.now().plus(RESET_PASSWORD_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
+                .build();
+
+        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+        JWSObject jwsObject = new JWSObject(header, payload);
+
+
+        try {
+            jwsObject.sign(new MACSigner(RESET_PASSWORD_KEY.getBytes()));
+            String resultToken =  jwsObject.serialize();
+            redisTemplate.opsForValue().set("rp-" + email, resultToken, RESET_PASSWORD_DURATION, TimeUnit.SECONDS);
+
+            return resultToken;
+
+        } catch (JOSEException error) {
+            log.error("Cannot create token ", error);
+            throw new RuntimeException(error);
+        }
+
+    }
+
+
+    public boolean verifyResetPasswordToken(String token) throws JOSEException, ParseException {
+
+        if(token == null || token.isEmpty()) {
+            throw new AppException(ErrorCode.RP_TOKEN_INVALID);
+        }
+
+        JWSVerifier verifier = new MACVerifier(RESET_PASSWORD_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        String userEmail = signedJWT.getJWTClaimsSet().getSubject();
+
+        String storedToken = redisTemplate.opsForValue().get("rp-" + userEmail);
+
+        if(!(storedToken != null && storedToken.equals(token))) {
+            throw new AppException(ErrorCode.RP_TOKEN_INVALID);
+        }
+
+        var verified = signedJWT.verify(verifier);
+
+        if (expiryTime.before(new Date())) throw new AppException(ErrorCode.RP_TOKEN_EXPIRED);
+        if(!verified) throw new AppException(ErrorCode.RP_TOKEN_INVALID);
+
+        return true;
     }
 }

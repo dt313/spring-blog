@@ -22,8 +22,13 @@ public class UserResponse {
      LocalDate dob;
      String username;
      String name;
-     String password;
      String avatar;
+     String bio = "";
+     String web_link = "";
+     String fb_link = "";
+     String gh_link = "";
+     String ig_link = "";
+     String lk_link = "";
      Set<Role> roles;
      @JsonProperty("created_at")
      Instant createdAt;

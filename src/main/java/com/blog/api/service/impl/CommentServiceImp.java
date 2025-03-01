@@ -11,10 +11,7 @@ import com.blog.api.exception.ErrorCode;
 import com.blog.api.mapper.CommentMapper;
 import com.blog.api.mapper.ReactionMapper;
 import com.blog.api.mapper.UserMapper;
-import com.blog.api.repository.ArticleRepository;
-import com.blog.api.repository.CommentRepository;
-import com.blog.api.repository.ReactionRepository;
-import com.blog.api.repository.UserRepository;
+import com.blog.api.repository.*;
 import com.blog.api.service.CommentService;
 import com.blog.api.types.ReactionType;
 import com.blog.api.types.TableType;
@@ -24,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +42,7 @@ public class CommentServiceImp implements CommentService {
     ReactionRepository reactionRepository;
     TableUtils tableUtils;
     ReactionMapper reactionMapper;
+    NotificationRepository notificationRepository;
 
     @Override
     public CommentResponse create(CommentCreationRequest request) {
@@ -169,10 +168,12 @@ public class CommentServiceImp implements CommentService {
     }
 
     @Override
-
     public void delete(Long id) {
-        boolean isExists = commentRepository.existsById(id);
-        if(isExists) {
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+
+        if(username.equals(comment.getPublisher().getUsername())) {
             commentRepository.deleteById(id);
         }else throw new AppException(ErrorCode.COMMENT_NOT_FOUND);
     }
