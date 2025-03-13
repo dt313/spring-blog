@@ -81,7 +81,3 @@ jwt:
   refreshable-duration: 86400
   reset-password-key: "OeHwueSNJEm6+qCtMk8F/VJFfIUjuPVTgKChBKEd2QhwRhAqZYBdJi3nxl0nldWg"
   reset-password-duration: 300
-
-gpt:
-  secretKey: "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"
-
