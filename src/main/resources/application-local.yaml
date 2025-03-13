@@ -23,7 +23,7 @@ spring:
     host: "smtp.gmail.com"
     port: 587
     username: "tuanbon21313@gmail.com"
-    password: "ffdy mbmg zwey zzgc"
+    password: ${GMAIL_PW}
     properties:
       mail:
         smtp:
@@ -82,10 +82,10 @@ spring:
 
 
 jwt:
-  signerKey: "by3A3pE0Xi35UmiCMaTxUiGP80OkIyedn3F4v4ke4O2XPu/MXK57FanVqhUTpZ7y"
+  signerKey: ${SIGNER_KEY}
   valid-duration: 3600
   refreshable-duration: 86400
-  reset-password-key: "OeHwueSNJEm6+qCtMk8F/VJFfIUjuPVTgKChBKEd2QhwRhAqZYBdJi3nxl0nldWg"
+  reset-password-key: ${REFRESH_KEY}
   reset-password-duration: 300
 
 
