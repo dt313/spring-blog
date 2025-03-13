@@ -59,7 +59,7 @@ spring:
 
 
   datasource:
-    url: "jdbc:postgresql://dpg-cv2mukjtq21c73f1uk8g-a.oregon-postgres.render.com:5432/bot_65zt"
+    url: ${PROD_PG_URL}
     username: "dt313"
     password: ${PG_PW}
     hikari:
