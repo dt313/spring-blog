@@ -1,17 +1,36 @@
 server:
   port: 8080
+  domain: "https://bot-image-5lbh.onrender.com/api/v1"
 client:
-  domain: "http://web-dev.com:3000"
-
-
-
+  domain: "https://bagoftech.vercel.app"
 spring:
+
+  data:
+    redis:
+      host: "red-cv2n5ggfnakc738d2b6g"
+      port: 6379
   web:
     resources:
       static-locations: file:/uploads/images/
 
+  mail:
+    host: "smtp.gmail.com"
+    port: 587
+    username: "tuanbon21313@gmail.com"
+    password: "ffdy mbmg zwey zzgc"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable : true
+
+
+
+
+
   application:
-    name: api
+    name: "blog-prod-api"
 
   security:
     oauth2:
@@ -20,29 +39,32 @@ spring:
           google:
             client-id: "958297514464-nocdv0v1q0rbqhacir1cf6lo6vidt7pi.apps.googleusercontent.com"
             client-secret: ${GG_SECRET}
-            redirect-uri: "http://localhost:8080/oauth2/callback/google"
+            redirect-uri: "https://bot-image-5lbh.onrender.com/oauth2/callback/google"
             scope:
               - profile
               - email
           github:
             clientId: "Ov23lik6O13NyVLk7W18"
             clientSecret: ${GH_SECRET}
-            redirect-uri: "http://localhost:8080/oauth2/callback/github"
+            redirect-uri: "https://bot-image-5lbh.onrender.com/oauth2/callback/github"
           facebook:
             clientId: "870226731637000"
             clientSecret: ${FB_SECRET}
             scope:
               - profile
-            redirect- uri: "http://localhost:8080/login/oauth2/code/facebook"
+            redirect- uri: "https://bot-image-5lbh.onrender.com/login/oauth2/code/facebook"
 
 
 
 
 
   datasource:
-    url: "jdbc:oracle:thin:@127.0.0.1:1521:xe"
-    username: ${ORACLE_USER}
-    password: ${ORACLE_PW}
+    url: "jdbc:postgresql://dpg-cv2mukjtq21c73f1uk8g-a.oregon-postgres.render.com:5432/bot_65zt"
+    username: "dt313"
+    password: "fEALcGtep4QOQf59VGJiAYyyWznRD7dC"
+    hikari:
+      auto-commit: false
+
 
   jpa:
     hibernate:
@@ -51,6 +73,15 @@ spring:
 
 
 
+
+
 jwt:
-  valid-duration: 36000
-  refreshable-duration: 360000
+  signerKey: "by3A3pE0Xi35UmiCMaTxUiGP80OkIyedn3F4v4ke4O2XPu/MXK57FanVqhUTpZ7y"
+  valid-duration: 3600
+  refreshable-duration: 86400
+  reset-password-key: "OeHwueSNJEm6+qCtMk8F/VJFfIUjuPVTgKChBKEd2QhwRhAqZYBdJi3nxl0nldWg"
+  reset-password-duration: 300
+
+gpt:
+  secretKey: "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"
+

@@ -20,11 +20,12 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findByIsPublished(boolean isPublished);
     Optional<Article> findBySlug(String slug);
     List<Article> findAllByAuthor(User author);
-    @Query("SELECT e FROM Article e WHERE e.isPublished = :isPublished AND (e.title LIKE %:word% OR e.metaTitle LIKE %:word% OR e.content LIKE %:word%)"  )
-    List<Article> findByTitleContainingAndIsPublished(
-            @Param("word")String title,@Param("isPublished")boolean isPublished, PageRequest pageRequest);
-    @Query("SELECT e FROM Article e WHERE e.isPublished = :isPublished AND (e.title LIKE %:word% OR e.metaTitle LIKE %:word% OR e.content LIKE %:word%)"  )
 
+    @Query("SELECT e FROM Article e WHERE e.isPublished = :isPublished AND (CAST(e.title AS text) ILIKE %:word% OR CAST(e.metaTitle AS text) ILIKE %:word% OR CAST(e.content AS text) ILIKE %:word%)")
+    List<Article> findByTitleContainingAndIsPublished(
+
+            @Param("word") String title, @Param("isPublished") boolean isPublished, PageRequest pageRequest);
+    @Query("SELECT e FROM Article e WHERE e.isPublished = :isPublished AND (CAST(e.title AS text) ILIKE %:word% OR CAST(e.metaTitle AS text) ILIKE %:word% OR CAST(e.content AS text) ILIKE %:word%)")
     List<Article> findByTitleContainingAndIsPublished(
             @Param("word") String title,@Param("isPublished") boolean isPublished);
     @Query("SELECT a FROM Article a JOIN a.topics t WHERE t.name = :topic")

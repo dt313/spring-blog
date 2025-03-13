@@ -21,11 +21,5 @@ public interface NotificationRepository extends JpaRepository<Notification,Long>
     List<Notification> findAllBySenderAndReceiverAndTypeAndDirectObjectId
             (User sender, User receiver, NotificationType type, Long id);
 
-    void deleteByDirectObjectId(Long directObjectId);
 
-    // Xóa tất cả notifications của reply comment (reply có commentableId là id của comment cha)
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Notification n WHERE n.directObjectId IN (SELECT c.id FROM Comment c WHERE c.commentableId = :commentId)")
-    void deleteByRepliesOfComment(@Param("commentId") Long commentId);
 }

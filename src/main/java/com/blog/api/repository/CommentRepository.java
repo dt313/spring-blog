@@ -16,8 +16,5 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findAllByCommentTypeAndCommentableId(TableType type, Long id, Pageable pageable);
     List<Comment> findAllByCommentTypeAndCommentableId(TableType type, Long id);
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Comment c WHERE c.commentableId = :commentableId")
-    void deleteByCommentableId(@Param("commentableId") Long commentableId);
+
 }

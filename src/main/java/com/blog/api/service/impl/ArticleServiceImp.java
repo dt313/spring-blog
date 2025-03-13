@@ -29,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.time.*;
@@ -87,6 +88,8 @@ public class ArticleServiceImp implements ArticleService {
 
             return temp;
         }).toList();
+
+
 
 
         return articles;

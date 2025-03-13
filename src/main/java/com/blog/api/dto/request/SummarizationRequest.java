@@ -4,12 +4,10 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Message {
-    Long to;
-    String message;
-
+public class SummarizationRequest {
+    String content;
 }

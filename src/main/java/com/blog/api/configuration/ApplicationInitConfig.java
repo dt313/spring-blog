@@ -9,8 +9,10 @@ import com.blog.api.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,12 +31,17 @@ public class ApplicationInitConfig {
 
     PasswordEncoder passwordEncoder;
 
-    RedisTemplate<String, String> redisTemplate;
+    @NonFinal
+    @Value("${spring.application.name}")
+    String APP_NAME;
+
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository,
                                             PermissionRepository permissionRepository,
                                             RoleRepository roleRepository) {
         return args -> {
+
+            System.out.println("APP Starting ...................... BOT : " + APP_NAME);
 
                 if(userRepository.findByUsername("admin").isEmpty()) {
                     Permission permission = new Permission("CREATE" , "create post");
