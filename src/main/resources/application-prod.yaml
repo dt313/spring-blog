@@ -61,7 +61,7 @@ spring:
   datasource:
     url: "jdbc:postgresql://dpg-cv2mukjtq21c73f1uk8g-a.oregon-postgres.render.com:5432/bot_65zt"
     username: "dt313"
-    password: "fEALcGtep4QOQf59VGJiAYyyWznRD7dC"
+    password: ${PG_PW}
     hikari:
       auto-commit: false
 
