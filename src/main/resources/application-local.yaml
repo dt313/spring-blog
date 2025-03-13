@@ -51,7 +51,7 @@ spring:
               - email
           github:
             clientId: "Ov23li6SB6Y6ATVziL8S"
-            clientSecret: "3759ed3bbf985d9db804e35dcb15aab57d2bffd2"
+#            clientSecret: "3759ed3bbf985d9db804e35dcb15aab57d2bffd2"
             redirect-uri: "http://localhost:8080/oauth2/callback/github"
           facebook:
             clientId: "870226731637000"
