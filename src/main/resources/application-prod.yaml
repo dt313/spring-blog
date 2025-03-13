@@ -7,7 +7,7 @@ spring:
 
   data:
     redis:
-      host: "red-cv2n5ggfnakc738d2b6g"
+      host: ${PROD_REDIS_HOST}
       port: 6379
   web:
     resources:
