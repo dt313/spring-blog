@@ -36,6 +36,7 @@ public class ApplicationInitConfig {
     String APP_NAME;
 
     @Bean
+
     ApplicationRunner applicationRunner(UserRepository userRepository,
                                             PermissionRepository permissionRepository,
                                             RoleRepository roleRepository) {
