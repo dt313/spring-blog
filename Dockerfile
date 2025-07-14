@@ -1,15 +1,12 @@
-# Use an official OpenJDK runtime as a parent image
+# Stage 1: Build the JAR
+FROM maven:3.9-eclipse-temurin AS build
+WORKDIR /build
+COPY . .
+RUN mvn clean package -DskipTests
+
+# Stage 2: Run the app
 FROM openjdk:22-jdk-slim
-
-# Set the working directory in the container
 WORKDIR /app
-
-# Copy the project's JAR file to the container
-COPY ./target/*.jar app.jar
-
-
-# Expose the port the application runs on
+COPY --from=build /build/target/*.jar app.jar
 EXPOSE 8080
-
-# Run the JAR file
 ENTRYPOINT ["java", "-jar", "app.jar"]
