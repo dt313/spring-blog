@@ -6,11 +6,11 @@ client:
 spring:
 
   ai:
-    ollama:
-      base-url: http://127.0.0.1:11434/api/chat
-      chat:
-        options:
-          model: llama3.2
+    factchat:
+      base-url: ${LLM_BASE_URL}
+      key: ${LLM_API_KEY}
+      model: ${LLM_MODEL}
+
 
   data:
     redis:
