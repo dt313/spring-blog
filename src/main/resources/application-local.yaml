@@ -1,19 +1,18 @@
 server:
   port: 8080
-  domain: ${LOCAL_SERVER_DOMAIN}
+  domain: ${SERVER_DOMAIN}
 client:
-  domain: ${LOCAL_CLIENT_DOMAIN}
+  domain: ${CLIENT_DOMAIN}
 spring:
   ai:
-    ollama:
-      base-url: http://127.0.0.1:11434/api/chat
-      chat:
-        options:
-          model: llama3.2
+    factchat:
+      base-url: ${LLM_BASE_URL}
+      key: ${LLM_API_KEY}
+      model: ${LLM_MODEL}
 
   data:
     redis:
-      host: ${LOCAL_REDIS_HOST}
+      host: ${REDIS_HOST}
       port: 6379
   web:
     resources:
@@ -22,8 +21,8 @@ spring:
   mail:
     host: "smtp.gmail.com"
     port: 587
-    username: ${LOCAL_GMAIL_USER}
-    password: ${LOCAL_GMAIL_PW}
+    username: ${GMAIL_USER}
+    password: ${GMAIL_PW}
     properties:
       mail:
         smtp:
@@ -43,31 +42,33 @@ spring:
       client:
         registration:
           google:
-            client-id: ${LOCAL_GG_ID}
-            client-secret: ${LOCAL_GG_SECRET}
-            redirect-uri: ${LOCAL_SERVER_ORIGIN}/oauth2/callback/google
+            client-id: ${GG_ID}
+            client-secret: ${GG_SECRET}
+            redirect-uri: ${SERVER_ORIGIN}/oauth2/callback/google
             scope:
               - profile
               - email
           github:
-            clientId: ${LOCAL_GH_ID}
-            clientSecret: ${GH_LOCAL_SECRET}
-            redirect-uri: ${LOCAL_SERVER_ORIGIN}/oauth2/callback/github"
+            clientId: ${GH_ID}
+            clientSecret: ${GH_SECRET}
+            redirect-uri: ${SERVER_ORIGIN}/oauth2/callback/github
+            scope:
+              - read:user
           facebook:
-            clientId: ${LOCAL_FB_ID}
+            clientId: ${FB_ID}
             clientSecret: ${FB_SECRET}
             scope:
               - profile
-            redirect- uri: ${LOCAL_SERVER_ORIGIN}/oauth2/code/facebook"
+            redirect-uri: ${SERVER_ORIGIN}/oauth2/code/facebook
 
 
 
 
 
   datasource:
-    url: jdbc:${LOCAL_PG_URL}
-    username: ${LOCAL_PG_USER}
-    password: ${LOCAL_PG_PW}
+    url: jdbc:${PG_URL}
+    username: ${PG_USER}
+    password: ${PG_PW}
     hikari:
       auto-commit: false
 
@@ -82,10 +83,10 @@ spring:
 
 
 jwt:
-  signerKey: ${LOCAL_SIGNER_KEY}
+  signerKey: ${SIGNER_KEY}
   valid-duration: 3600
   refreshable-duration: 86400
-  reset-password-key: ${LOCAL_REFRESH_KEY}
+  reset-password-key: ${REFRESH_KEY}
   reset-password-duration: 300
 
 

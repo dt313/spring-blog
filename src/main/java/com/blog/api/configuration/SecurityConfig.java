@@ -55,7 +55,7 @@ public class SecurityConfig  {
             "/api/v1/auth/refresh",
             "/api/v1/users",
             "/api/v1/articles/suggestion",
-            "/api/v1/ai/summarization",
+
     };
 
     private final String[] PUT_METHOD_PUBLIC_ENDPOINTS = {

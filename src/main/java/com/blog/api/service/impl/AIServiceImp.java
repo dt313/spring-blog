@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RequiredArgsConstructor
@@ -27,13 +28,18 @@ public class AIServiceImp implements AIService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @NonFinal
-    @Value("${spring.ai.ollama.base-url}")
-    private String END_POINT;
 
     @NonFinal
-    @Value("${spring.ai.ollama.chat.options.model}")
-    private String MODEL_NAME;
+    @Value("${spring.ai.factchat.base-url}")
+    private String END_POINT; // https://factchat-cloud.mindlogic.ai/v1/api/openai/chat/completions
+
+    @NonFinal
+    @Value("${spring.ai.factchat.key}")
+    private String API_KEY;
+
+    @NonFinal
+    @Value("${spring.ai.factchat.model}")
+    private String MODEL_NAME; // gpt-5-chat-latest
     @Override
     public String summarization(SummarizationRequest request) {
         try {
@@ -46,20 +52,30 @@ public class AIServiceImp implements AIService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(API_KEY); // Authorization: Bearer xxx
 
             HttpEntity<ChatRequest> requestEntity = new HttpEntity<>(chatRequest, headers);
 
-            ResponseEntity<ChatResponse> response = restTemplate.exchange(
+            ResponseEntity<Map> response = restTemplate.exchange(
                     END_POINT,
                     HttpMethod.POST,
                     requestEntity,
-                    ChatResponse.class
+                    Map.class
             );
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                ChatResponse chatResponse = response.getBody();
-                log.info(chatResponse.getMessage().getContent());
-                return Objects.requireNonNull(chatResponse.getMessage().getContent()); // Trả về nội dung tóm tắt
+                Map<String, Object> responseBody = response.getBody();
+
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
+                if (choices != null && !choices.isEmpty()) {
+                    Map<String, Object> firstChoice = choices.get(0);
+                    Map<String, Object> message = (Map<String, Object>) firstChoice.get("message");
+                    if (message != null && message.get("content") != null) {
+                        String content = message.get("content").toString();
+                        log.info("AI Response: {}", content);
+                        return content;
+                    }
+                }
             } else {
                 log.warn("Ollama API returned an unexpected response: {}", response);
             }

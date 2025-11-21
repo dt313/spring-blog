@@ -44,33 +44,33 @@ public class ApplicationInitConfig {
 
             System.out.println("APP Starting ...................... BOT : " + APP_NAME);
 
-                if(userRepository.findByUsername("admin").isEmpty()) {
-                    Permission permission = new Permission("CREATE" , "create post");
-                    Permission permission1 = new Permission("UPDATE" , "update post");
-                    permissionRepository.save(permission);
-                    permissionRepository.save(permission1);
-
-                    Set<Permission> permissions = new HashSet<>();
-                    permissions.add(permission1);
-                    permissions.add(permission);
-
-
-                    Role adminRole = new Role("ADMIN", "admin role", permissions);
-                    Role userRole = new Role("USER", "user role", permissions);
-
-                    roleRepository.save(adminRole);
-                    roleRepository.save(userRole);
-                    Set<Role> newRole = new HashSet<>();
-                    newRole.add(adminRole);
-                    User user = User.builder().username("admin").email("admin@gmail.com")
-                            .password(passwordEncoder.encode("admin"))
-                            .roles(newRole)
-                            .build();
-
-                    userRepository.save(user);
-                    log.warn("admin user has been created with default password : admin , please change it");
-
-                }
+//                if(userRepository.findByUsername("admin").isEmpty()) {
+//                    Permission permission = new Permission("CREATE" , "create post");
+//                    Permission permission1 = new Permission("UPDATE" , "update post");
+//                    permissionRepository.save(permission);
+//                    permissionRepository.save(permission1);
+//
+//                    Set<Permission> permissions = new HashSet<>();
+//                    permissions.add(permission1);
+//                    permissions.add(permission);
+//
+//
+//                    Role adminRole = new Role("ADMIN", "admin role", permissions);
+//                    Role userRole = new Role("USER", "user role", permissions);
+//
+//                    roleRepository.save(adminRole);
+//                    roleRepository.save(userRole);
+//                    Set<Role> newRole = new HashSet<>();
+//                    newRole.add(adminRole);
+//                    User user = User.builder().username("admin").email("admin@gmail.com")
+//                            .password(passwordEncoder.encode("admin"))
+//                            .roles(newRole)
+//                            .build();
+//
+//                    userRepository.save(user);
+//                    log.warn("admin user has been created with default password : admin , please change it");
+//
+//                }
             };
         }
 

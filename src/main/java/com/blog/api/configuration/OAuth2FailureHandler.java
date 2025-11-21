@@ -17,6 +17,7 @@ public class OAuth2FailureHandler implements AuthenticationFailureHandler {
     private String redirectUri;
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+
         response.sendRedirect(redirectUri+"/login/oauth2/error");
     }
 }

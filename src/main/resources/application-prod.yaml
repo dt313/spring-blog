@@ -1,8 +1,8 @@
 server:
   port: 8080
-  domain: ${PROD_SERVER_DOMAIN}
+  domain: ${SERVER_DOMAIN}
 client:
-  domain: ${PROD_CLIENT_DOMAIN}
+  domain: ${CLIENT_DOMAIN}
 spring:
 
   ai:
@@ -14,7 +14,7 @@ spring:
 
   data:
     redis:
-      host: ${PROD_REDIS_HOST}
+      host: ${REDIS_HOST}
       port: 6379
   web:
     resources:
@@ -23,8 +23,8 @@ spring:
   mail:
     host: "smtp.gmail.com"
     port: 587
-    username: ${PROD_GMAIL_USER}
-    password: ${PROD_GMAIL_PW}
+    username: ${GMAIL_USER}
+    password: ${GMAIL_PW}
     properties:
       mail:
         smtp:
@@ -44,31 +44,31 @@ spring:
       client:
         registration:
           google:
-            client-id: ${PROD_GG_ID}
-            client-secret: ${PROD_GG_SECRET}
-            redirect-uri: ${PROD_SERVER_ORIGIN}/oauth2/callback/google
+            client-id: ${GG_ID}
+            client-secret: ${GG_SECRET}
+            redirect-uri: ${SERVER_ORIGIN}/oauth2/callback/google
             scope:
               - profile
               - email
           github:
-            clientId: ${PROD_GH_ID}
-            clientSecret: ${PROD_GH_SECRET}
-            redirect-uri: ${PROD_SERVER_ORIGIN}/oauth2/callback/github
+            clientId: ${GH_ID}
+            clientSecret: ${GH_SECRET}
+            redirect-uri: ${SERVER_ORIGIN}/oauth2/callback/github
           facebook:
-            clientId: ${PROD_FB_ID}
-            clientSecret: ${PROD_FB_SECRET}
+            clientId: ${FB_ID}
+            clientSecret: ${FB_SECRET}
             scope:
               - profile
-            redirect- uri: ${PROD_SERVER_ORIGIN}/oauth2/code/facebook
+            redirect- uri: ${SERVER_ORIGIN}/oauth2/code/facebook
 
 
 
 
 
   datasource:
-    url: jdbc:${PROD_PG_URL}
-    username: ${PROD_PG_USER}
-    password: ${PROD_PG_PW}
+    url: jdbc:${PG_URL}
+    username: ${PG_USER}
+    password: ${PG_PW}
 
     hikari:
       auto-commit: false
@@ -84,8 +84,8 @@ spring:
 
 
 jwt:
-  signerKey: ${PROD_REFRESH_KEY}
+  signerKey: ${REFRESH_KEY}
   valid-duration: 3600
   refreshable-duration: 86400
-  reset-password-key: ${PROD_SIGNER_KEY}
+  reset-password-key: ${SIGNER_KEY}
   reset-password-duration: 300
